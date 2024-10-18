@@ -1,0 +1,30 @@
+name: ollama_gtk
+description: "a flutter app build with ubuntu style"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  yaru: ^5.3.0
+  safe_change_notifier: ^0.4.0
+  provider: ^6.1.2
+  handy_window: ^0.4.0
+  ollama_dart: ^0.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
+  assets:
+    - assets/
+  fonts:
+    - family: YaruIcons
+      fonts:
+        - asset: assets/yaru_icons.otf
