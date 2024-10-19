@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk/pages/talk/talk_model.dart';
@@ -34,27 +35,23 @@ class TalkPage extends StatefulWidget {
 }
 
 class _TalkPageState extends State<TalkPage> {
+
   @override
   Widget build(BuildContext context) {
     final model = context.watch<TalkModel>();
-    return SimpleDialog(
-      titlePadding: EdgeInsets.zero,
-      title: YaruDialogTitleBar(
-        titleSpacing: 0,
-        centerTitle: true,
-        title: YaruIconButton(
-            icon: Icon(YaruIcons.settings)
+    return YaruDetailPage(
+      body: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Column(
+          children: [
+            UserQuestionWidget(onSubmit: (String question) {
+              if(kDebugMode) {
+                print(question);
+              }
+            }),
+          ],
         ),
       ),
-      children: [
-        SizedBox(
-          height: 300,
-          width: 450,
-          child: Center(
-            child: Text("测试"),
-          ),
-        ),
-      ],
     );
   }
 
@@ -63,4 +60,83 @@ class _TalkPageState extends State<TalkPage> {
     super.initState();
     context.read<TalkModel>().init();
   }
+
+}
+
+//获取用户提问框
+class UserQuestionWidget extends StatefulWidget {
+
+  final ValueChanged<String> onSubmit;
+
+  const UserQuestionWidget({super.key, required this.onSubmit});
+
+  @override
+  State<StatefulWidget> createState() => _UserQuestionWidgetState();
+}
+
+class _UserQuestionWidgetState extends State<UserQuestionWidget> {
+
+  TextEditingController _questionTextEditingController = TextEditingController(text: "");
+
+  @override
+  Widget build(BuildContext context) {
+    var model = context.watch<TalkModel>();
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.fromBorderSide(
+          BorderSide(
+            color: YaruTheme.of(context).theme!.focusColor,
+            width: 1
+          ),
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(10))
+      ),
+      child: Column(
+        children: [
+          TextField(
+            decoration: InputDecoration(
+                hintText: "请输入内容",
+                border: const OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.all(Radius.circular(10))
+                ),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.all(Radius.circular(10))
+                ),
+                fillColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
+                focusColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
+                hoverColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
+            ),
+            controller: _questionTextEditingController,
+            autofocus: true,
+            maxLength: 1000,
+            maxLines: 3,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5),
+            child: Row(
+              children: [
+                Expanded(child: Text(model.runningModel?.model ?? "模型未选择", style: YaruTheme.of(context).theme?.textTheme.bodySmall,)),
+                ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      textStyle: YaruTheme.of(context).theme?.textTheme.bodySmall,
+                    ),
+                    icon: const Icon(YaruIcons.send),
+                    onPressed: () {
+                      widget.onSubmit(_questionTextEditingController.text);
+                    }, label: const Text("发送")
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
 }
