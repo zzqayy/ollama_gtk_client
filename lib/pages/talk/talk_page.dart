@@ -129,9 +129,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                     icon: const Icon(YaruIcons.send),
                     onPressed: () {
                       String submitText = _questionTextEditingController.text;
-                      setState(() {
-                        _questionTextEditingController.text = "";
-                      });
+                      _questionTextEditingController.text = "";
                       widget.onSubmit(submitText);
                     }, label: const Text("发送")
                 ),

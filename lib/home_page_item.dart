@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:ollama_gtk/pages/setting/setting_page.dart';
 import 'package:ollama_gtk/pages/talk/talk_page.dart';
 import 'package:yaru/yaru.dart';
 
@@ -34,5 +35,10 @@ final menuPageItems = <PageItem>[
       actionsBuilder: (context) => TalkPage.createActions(context),
       pageBuilder: (context) => TalkPage.create(context),
       iconBuilder: (context, selected) => const Icon(YaruIcons.chat_bubble),
+  ),
+  PageItem(
+    title: '设置',
+    pageBuilder: (context) => SettingPage.create(context),
+    iconBuilder: (context, selected) => const Icon(YaruIcons.settings),
   ),
 ];

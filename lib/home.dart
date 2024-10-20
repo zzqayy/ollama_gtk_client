@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk/home_model.dart';
 import 'package:ollama_gtk/home_page_item.dart';
+import 'package:ollama_gtk/pages/setting/setting_page.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -63,14 +63,14 @@ class _HomePageState extends State<HomePage> {
         border: BorderSide.none,
         backgroundColor: YaruMasterDetailTheme.of(context).sideBarColor,
       ),
-      bottomBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: YaruMasterTile(
-          leading: const Icon(YaruIcons.gear),
-          title: const Text('Settings'),
-          onTap: () => showSettingsDialog(context),
-        ),
-      ),
+      // bottomBar: Padding(
+      //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+      //   child: YaruMasterTile(
+      //     leading: const Icon(YaruIcons.gear),
+      //     title: const Text('设置'),
+      //     onTap: () => showSettingsDialog(context),
+      //   ),
+      // ),
     );
   }
 }
@@ -98,22 +98,15 @@ Future<void> showSettingsDialog(BuildContext context) {
     builder: (context) {
       return AlertDialog(
         title: const YaruDialogTitleBar(
-          title: Text('Settings'),
+          title: Text('设置'),
         ),
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.all(kYaruPagePadding),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            YaruTile(
-              title: const Text('测试'),
-            ),
-          ],
-        ),
+        content: SettingPage(),
         actions: [
           OutlinedButton(
             onPressed: Navigator.of(context).pop,
-            child: const Text('Close'),
+            child: const Text('关闭'),
           ),
         ],
       );
