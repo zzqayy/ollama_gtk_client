@@ -72,11 +72,16 @@ Future<void> showEditTextDialog({required BuildContext context,
 }) {
   TextEditingController _textController = TextEditingController(text: initVal);
   return showDialog(
+    barrierDismissible: false,
     context: context,
     builder: (context) {
       return AlertDialog(
         title: YaruDialogTitleBar(
           title: Text(title),
+          onClose: (context) {
+            _textController.dispose();
+            Navigator.maybePop(context);
+          },
         ),
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.all(kYaruPagePadding),
