@@ -1,0 +1,27 @@
+display_name: Ollama Gtk
+package_name: ollama-gtk
+
+maintainer:
+  name: zzqayy
+  email: zzqayy@qq.com
+
+priority: optional
+
+section: x11
+
+installed_size: 24360
+
+essential: false
+
+icon: assets/icons/icon.png
+
+postuninstall_scripts:
+  - echo "即将卸载."
+
+keywords:
+  - ollama
+  - AI
+generic_name: ollama-gtk
+categories:
+  - Utility
+startup_notify: true
