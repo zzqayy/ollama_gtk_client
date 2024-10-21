@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk/pages/talk/talk_model.dart';
 import 'package:provider/provider.dart';
-import 'package:yaru/widgets.dart';
 import 'package:yaru/yaru.dart';
 
 class SettingPage extends StatefulWidget {

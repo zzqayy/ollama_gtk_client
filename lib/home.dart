@@ -13,7 +13,9 @@ class HomePage extends StatefulWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<HomeModel>(
-          create: (_) => HomeModel(),
+          create: (_) => HomeModel(
+            connectStatus: false
+          ),
         ),
       ],
       child: const HomePage(),
@@ -63,14 +65,16 @@ class _HomePageState extends State<HomePage> {
         border: BorderSide.none,
         backgroundColor: YaruMasterDetailTheme.of(context).sideBarColor,
       ),
-      // bottomBar: Padding(
-      //   padding: const EdgeInsets.symmetric(vertical: 8.0),
-      //   child: YaruMasterTile(
-      //     leading: const Icon(YaruIcons.gear),
-      //     title: const Text('设置'),
-      //     onTap: () => showSettingsDialog(context),
-      //   ),
-      // ),
+      bottomBar: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: YaruMasterTile(
+          leading: Icon(YaruIcons.radiobox_filled, color: (true == model.connectStatus) ? Colors.green : Colors.redAccent,),
+          title: Text("${(true == model.connectStatus) ? "在线": "离线"}(${model.version})"),
+          onTap: () {
+            model.refreshStatus();
+          },
+        ),
+      ),
     );
   }
 }
@@ -89,27 +93,4 @@ List<Widget>? buildActions(BuildContext context, PageItem item) {
 
 Widget? buildFloatingActionButton(BuildContext context, PageItem item) {
   return item.floatingActionButtonBuilder?.call(context);
-}
-
-Future<void> showSettingsDialog(BuildContext context) {
-
-  return showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const YaruDialogTitleBar(
-          title: Text('设置'),
-        ),
-        titlePadding: EdgeInsets.zero,
-        contentPadding: const EdgeInsets.all(kYaruPagePadding),
-        content: SettingPage(),
-        actions: [
-          OutlinedButton(
-            onPressed: Navigator.of(context).pop,
-            child: const Text('关闭'),
-          ),
-        ],
-      );
-    },
-  );
 }

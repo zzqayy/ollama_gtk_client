@@ -2,10 +2,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:ollama_gtk/home.dart';
+import 'package:ollama_gtk/setting_model.dart';
 import 'package:ollama_gtk/theme.dart';
+import 'package:ollama_gtk/utils/setting_utils.dart';
 import 'package:yaru/yaru.dart';
 
+SettingModel settingModel = SettingModel();
 Future<void> main() async {
+  settingModel =  await SettingUtils.getSettingProperties();
   await YaruWindowTitleBar.ensureInitialized();
 
   WidgetsFlutterBinding.ensureInitialized();

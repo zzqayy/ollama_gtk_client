@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk/setting_model.dart';
 import '/utils/storage_utils.dart';
 
