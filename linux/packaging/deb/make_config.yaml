@@ -1,5 +1,5 @@
-display_name: Ollama GTK
-package_name: ollama-gtk
+display_name: Ollama GTK Client
+package_name: ollama-gtk-client
 
 maintainer:
   name: zzqayy
@@ -21,7 +21,7 @@ postuninstall_scripts:
 keywords:
   - ollama
   - AI
-generic_name: ollama-gtk
+generic_name: ollama-gtk-client
 categories:
   - Utility
 startup_notify: true
