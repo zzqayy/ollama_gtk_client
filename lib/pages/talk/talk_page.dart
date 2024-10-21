@@ -132,29 +132,24 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     final settingModel = context.watch<SettingModel>();
     return Container(
       decoration: BoxDecoration(
-          border: Border.fromBorderSide(
-            BorderSide(
-                color: YaruTheme.of(context).theme!.focusColor, width: 1),
-          ),
+          border: Border.fromBorderSide(YaruTheme.of(context).theme!.inputDecorationTheme.border!.borderSide),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Column(
         children: [
           TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: "请输入内容",
-              border: const OutlineInputBorder(
+              border: OutlineInputBorder(
                 borderSide: BorderSide.none,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-              focusedBorder: const OutlineInputBorder(
+              focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10))),
-              enabledBorder: const OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10))),
-              fillColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
-              focusColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
-              hoverColor: YaruTheme.of(context).theme?.scaffoldBackgroundColor,
+              filled: false,
             ),
             controller: _questionTextEditingController,
             autofocus: true,
