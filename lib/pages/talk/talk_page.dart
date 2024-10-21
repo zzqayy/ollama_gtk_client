@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ollama_gtk/home_model.dart';
 import 'package:ollama_gtk/pages/setting/setting_model.dart';
 import 'package:ollama_gtk/pages/talk/talk_model.dart';
 import 'package:provider/provider.dart';
@@ -19,16 +20,6 @@ class TalkPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _TalkPageState();
-
-  //创建右侧功能区域
-  static createActions(BuildContext context) {
-    return [
-      YaruIconButton(
-        icon: const Icon(YaruIcons.pen),
-        onPressed: () {},
-      ),
-    ];
-  }
 }
 
 class _TalkPageState extends State<TalkPage> {
@@ -37,6 +28,16 @@ class _TalkPageState extends State<TalkPage> {
     final talkModel = context.watch<TalkModel>();
     final settingModel = context.watch<SettingModel>();
     return YaruDetailPage(
+      appBar: AppBar(
+        actions: [
+          YaruIconButton(
+            icon: const Icon(YaruIcons.trash),
+            onPressed: () {
+              talkModel.clearHistory();
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(5),
         child: Column(

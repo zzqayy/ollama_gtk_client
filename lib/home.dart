@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: YaruMasterTile(
           leading: Icon(YaruIcons.radiobox_filled, color: (true == homeModel.connectStatus) ? Colors.green : Colors.redAccent,),
-          title: Text("${(true == homeModel.connectStatus) ? "在线": "离线"}(${homeModel.version})"),
+          title: Text(homeModel.version),
           onTap: () {
             homeModel.refreshStatus(settingModel);
           },

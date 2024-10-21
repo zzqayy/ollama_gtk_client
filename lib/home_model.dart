@@ -3,9 +3,14 @@ import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class HomeModel extends SafeChangeNotifier {
 
+  //连接状态
   bool connectStatus;
 
+  //ollama版本
   String version;
+
+  //清理
+  bool clearTalkStatus = false;
 
   HomeModel({required this.connectStatus, this.version = ""});
 

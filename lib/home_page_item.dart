@@ -32,7 +32,6 @@ class PageItem {
 final menuPageItems = <PageItem>[
   PageItem(
       title: '对话',
-      actionsBuilder: (context) => TalkPage.createActions(context),
       pageBuilder: (context) => TalkPage.create(context),
       iconBuilder: (context, selected) => const Icon(YaruIcons.chat_bubble),
   ),

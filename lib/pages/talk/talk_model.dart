@@ -60,6 +60,17 @@ class TalkModel extends SafeChangeNotifier {
     notifyListeners();
   }
 
+  //清空历史
+  void clearHistory() {
+    historyList = [];
+    if(!talkingStatus) {
+      hasTalk = false;
+      talkQuestion = "";
+      talkContent = "";
+    }
+    notifyListeners();
+  }
+
 }
 
 //回答历史
