@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ollama_gtk/home_model.dart';
 import 'package:ollama_gtk/home_page_item.dart';
-import 'package:ollama_gtk/pages/setting/setting_page.dart';
+import 'package:ollama_gtk/pages/setting/setting_model.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -17,6 +17,9 @@ class HomePage extends StatefulWidget {
             connectStatus: false
           ),
         ),
+        ChangeNotifierProvider<SettingModel>(
+            create: (_) => SettingModel()
+        )
       ],
       child: const HomePage(),
     );
@@ -30,12 +33,20 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<HomeModel>().init();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    var settingModel = context.read<SettingModel>();
+    await settingModel.init();
+    context.read<HomeModel>()
+        .init(settingModel);
   }
 
   @override
   Widget build(BuildContext context) {
-    final model = context.watch<HomeModel>();
+    final homeModel = context.watch<HomeModel>();
+    final settingModel = context.watch<SettingModel>();
     return YaruMasterDetailPage(
       paneLayoutDelegate: const YaruResizablePaneDelegate(
         initialPaneSize: 280,
@@ -51,14 +62,12 @@ class _HomePageState extends State<HomePage> {
         appBar: YaruWindowTitleBar(
           backgroundColor: Colors.transparent,
           border: BorderSide.none,
-          leading:
-          Navigator.of(context).canPop() ? const YaruBackButton() : null,
+          leading: Navigator.of(context).canPop() ? const YaruBackButton() : null,
           title: buildTitle(context, menuPageItems[index]),
           actions: buildActions(context, menuPageItems[index]),
         ),
         body: menuPageItems[index].pageBuilder(context),
-        floatingActionButton:
-        buildFloatingActionButton(context, menuPageItems[index]),
+        floatingActionButton: buildFloatingActionButton(context, menuPageItems[index]),
       ),
       appBar: YaruWindowTitleBar(
         title: const Text('Ollama Talk'),
@@ -68,10 +77,10 @@ class _HomePageState extends State<HomePage> {
       bottomBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: YaruMasterTile(
-          leading: Icon(YaruIcons.radiobox_filled, color: (true == model.connectStatus) ? Colors.green : Colors.redAccent,),
-          title: Text("${(true == model.connectStatus) ? "在线": "离线"}(${model.version})"),
+          leading: Icon(YaruIcons.radiobox_filled, color: (true == homeModel.connectStatus) ? Colors.green : Colors.redAccent,),
+          title: Text("${(true == homeModel.connectStatus) ? "在线": "离线"}(${homeModel.version})"),
           onTap: () {
-            model.refreshStatus();
+            homeModel.refreshStatus(settingModel);
           },
         ),
       ),

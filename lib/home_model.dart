@@ -1,4 +1,4 @@
-import 'package:ollama_gtk/main.dart';
+import 'package:ollama_gtk/pages/setting/setting_model.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class HomeModel extends SafeChangeNotifier {
@@ -10,14 +10,12 @@ class HomeModel extends SafeChangeNotifier {
   HomeModel({required this.connectStatus, this.version = ""});
 
   //初始化
-  Future<void> init() async {
-    await refreshStatus();
+  Future<void> init(SettingModel settingModel) async {
+    await refreshStatus(settingModel);
   }
 
-  bool getConnectStatus() => connectStatus;
-
   //重新测试连接状态
-  Future<void> refreshStatus() async {
+  Future<void> refreshStatus(SettingModel settingModel) async {
     try{
       var versionResponse = await settingModel.client?.getVersion();
       version = versionResponse?.version??"";

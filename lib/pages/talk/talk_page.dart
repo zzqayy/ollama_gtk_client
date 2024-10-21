@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk/pages/setting/setting_model.dart';
 import 'package:ollama_gtk/pages/talk/talk_model.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
@@ -12,7 +12,7 @@ class TalkPage extends StatefulWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<TalkModel>(
-            create: (_) => TalkModel(OllamaClient()))
+            create: (_) => TalkModel())
       ],
       child: const TalkPage(),
     );
@@ -39,6 +39,7 @@ class _TalkPageState extends State<TalkPage> {
   @override
   Widget build(BuildContext context) {
     final model = context.watch<TalkModel>();
+    final settingModel = context.watch<SettingModel>();
     return YaruDetailPage(
       body: Padding(
         padding: const EdgeInsets.all(5),
@@ -58,7 +59,7 @@ class _TalkPageState extends State<TalkPage> {
   @override
   void initState() {
     super.initState();
-    context.read<TalkModel>().init();
+    context.read<TalkModel>();
   }
 
 }
@@ -80,7 +81,8 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var model = context.watch<TalkModel>();
+    final talkModel = context.watch<TalkModel>();
+    final settingModel = context.watch<SettingModel>();
     return Container(
       decoration: BoxDecoration(
         border: Border.fromBorderSide(
@@ -121,7 +123,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             padding: const EdgeInsets.all(5),
             child: Row(
               children: [
-                Expanded(child: Text(model.runningModel?.model ?? "模型未选择", style: YaruTheme.of(context).theme?.textTheme.bodySmall,)),
+                Expanded(child: Text(settingModel.runningModel?.model ?? "模型未选择", style: YaruTheme.of(context).theme?.textTheme.bodySmall,)),
                 ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       textStyle: YaruTheme.of(context).theme?.textTheme.bodySmall,

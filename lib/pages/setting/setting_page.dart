@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ollama_dart/ollama_dart.dart';
-import 'package:ollama_gtk/pages/talk/talk_model.dart';
+import 'package:ollama_gtk/pages/setting/setting_model.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -12,13 +11,7 @@ class SettingPage extends StatefulWidget {
   State<StatefulWidget> createState() => _SettingPageState();
 
   static Widget create(context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<TalkModel>(
-            create: (_) => TalkModel(OllamaClient()))
-      ],
-      child: const SettingPage(),
-    );
+    return const SettingPage();
   }
 }
 
@@ -27,35 +20,40 @@ class _SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
-    var model = context.read<TalkModel>();
   }
 
   @override
   Widget build(BuildContext context) {
-    var model = context.read<TalkModel>();
+    final settingModel = context.watch<SettingModel>();
     return YaruDetailPage(
       body: ListView(
         children: [
           ListTile(
             title: const Text("Ollama地址"),
-            subtitle: Text(model.client.baseUrl??""),
+            subtitle: Text(settingModel.client?.baseUrl??""),
             onTap: () {
               showEditTextDialog(
                   context: context,
-                  onSubmit: (String value) {},
-                  initVal: model.client.baseUrl ?? "",
+                  onSubmit: (String? value) async {
+                    await settingModel.changeClientFromBaseUrl(
+                      baseUrl: value
+                    );
+                  },
+                  initVal: settingModel.client?.baseUrl ?? "",
                   title: "Ollama服务地址设置"
               );
             },
           ),
           ListTile(
             title: const Text("当前的模型"),
-            subtitle: Text(model.runningModel?.model??""),
+            subtitle: Text(settingModel.runningModel?.model??""),
             onTap: () {
               showEditTextDialog(
                   context: context,
-                  onSubmit: (String value) {},
-                  initVal: model.runningModel?.model??"",
+                  onSubmit: (String? value) async {
+                    await settingModel.changeRunningModel(value);
+                  },
+                  initVal: settingModel.runningModel?.model??"",
                   title: "选择模型"
               );
             },
@@ -66,6 +64,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 }
 
+//统一的弹出层
 Future<void> showEditTextDialog({required BuildContext context,
   required ValueChanged<String> onSubmit,
   String initVal = "",

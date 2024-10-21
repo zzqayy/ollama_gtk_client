@@ -1,15 +1,12 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:ollama_gtk/home.dart';
-import 'package:ollama_gtk/setting_model.dart';
 import 'package:ollama_gtk/theme.dart';
-import 'package:ollama_gtk/utils/setting_utils.dart';
 import 'package:yaru/yaru.dart';
 
-SettingModel settingModel = SettingModel();
 Future<void> main() async {
-  settingModel =  await SettingUtils.getSettingProperties();
   await YaruWindowTitleBar.ensureInitialized();
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +25,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final botToastBuilder = BotToastInit();
     return YaruTheme(
       data: YaruThemeData(
         variant: InheritedYaruVariant.of(context),
@@ -40,6 +38,11 @@ class MyApp extends StatelessWidget {
           darkTheme: yaru.darkTheme,
           highContrastTheme: yaruHighContrastLight,
           highContrastDarkTheme: yaruHighContrastDark,
+          builder: (context, child) {
+            child = botToastBuilder(context,child);
+            return child;
+          },
+          navigatorObservers: [BotToastNavigatorObserver()],
           home: HomePage.create(context),
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             dragDevices: {
