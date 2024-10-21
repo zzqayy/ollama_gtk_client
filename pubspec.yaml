@@ -1,4 +1,4 @@
-name: ollama_gtk
+name: ollama_gtk_client
 description: "a flutter app build with ubuntu style"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1

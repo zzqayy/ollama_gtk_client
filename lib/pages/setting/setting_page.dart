@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ollama_gtk/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 

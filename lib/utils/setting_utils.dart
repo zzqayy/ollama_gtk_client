@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
-import 'package:ollama_gtk/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import '/utils/storage_utils.dart';
 
 ///属性工具

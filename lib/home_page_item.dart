@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ollama_gtk/pages/setting/setting_page.dart';
-import 'package:ollama_gtk/pages/talk/talk_page.dart';
+import 'package:ollama_gtk_client/pages/setting/setting_page.dart';
+import 'package:ollama_gtk_client/pages/talk/talk_page.dart';
 import 'package:yaru/yaru.dart';
 
 //copyFrom yaru.dart项目

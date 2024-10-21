@@ -2,8 +2,8 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:ollama_gtk/home.dart';
-import 'package:ollama_gtk/theme.dart';
+import 'package:ollama_gtk_client/home.dart';
+import 'package:ollama_gtk_client/theme.dart';
 import 'package:yaru/yaru.dart';
 
 Future<void> main() async {

@@ -1,4 +1,4 @@
-# ollama_gtk
+# ollama_gtk_client
 
 a flutter app build with ubuntu style
 

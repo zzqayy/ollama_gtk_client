@@ -1,4 +1,4 @@
-import 'package:ollama_gtk/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class HomeModel extends SafeChangeNotifier {

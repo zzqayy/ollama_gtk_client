@@ -1,7 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
-import 'package:ollama_gtk/utils/setting_utils.dart';
+import 'package:ollama_gtk_client/utils/setting_utils.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 import 'package:yaru/yaru.dart';
 

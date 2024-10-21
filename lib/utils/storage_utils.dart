@@ -5,7 +5,7 @@ import '/utils/env_utils.dart';
 class StorageUtils {
 
   ///文件数据目录名
-  static const String appDirName = "ollama_gtk";
+  static const String appDirName = "ollama_gtk_client";
 
   ///数据文件夹
   static Future<Directory> getAppDateDir() async {
