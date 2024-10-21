@@ -51,18 +51,45 @@ class _TalkPageState extends State<TalkPage> {
                         if(index == 0) {
                           return Column(
                             children: [
-                              YaruTile(
-                                leading: const Icon(YaruIcons.user),
-                                title: YaruBorderContainer(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Expanded(child: SelectableText(talkModel.talkQuestion, textAlign: TextAlign.right)),
+                              Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: Icon(YaruIcons.user),
+                                    ),
+                                    Expanded(
+                                        child: Padding(
+                                      padding: kMaterialListPadding,
+                                      child: YaruInfoBadge(
+                                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                        yaruInfoType: YaruInfoType.important,
+                                        title: SelectableText(
+                                            talkModel.talkQuestion),
+                                      ),
+                                    ))
+                                  ],
                                 ),
                               ),
-                              YaruTile(
-                                leading: const Icon(YaruIcons.chat_text),
-                                title: YaruBorderContainer(
+                              Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: SelectableText(talkModel.talkContent),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(padding: EdgeInsets.all(8), child: Icon(YaruIcons.chat_text),),
+                                    Expanded(
+                                        child: Padding(
+                                          padding: kMaterialListPadding,
+                                          child: YaruInfoBadge(
+                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                            yaruInfoType: YaruInfoType.information,
+                                            title: SelectableText(
+                                                talkModel.talkContent),
+                                          ),
+                                        ))
+                                  ],
                                 ),
                               ),
                             ],
@@ -71,20 +98,47 @@ class _TalkPageState extends State<TalkPage> {
                           var item = talkModel.historyList[index - 1];
                           return Column(
                             children: [
-                              YaruTile(
-                                leading: const Icon(YaruIcons.user),
-                                title: YaruBorderContainer(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Expanded(child: SelectableText(item.talkQuestion, textAlign: TextAlign.right)),
+                              Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: Icon(YaruIcons.user),
+                                    ),
+                                    Expanded(
+                                        child: Padding(
+                                          padding: kMaterialListPadding,
+                                          child: YaruInfoBadge(
+                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                            yaruInfoType: YaruInfoType.important,
+                                            title: SelectableText(
+                                                item.talkQuestion),
+                                          ),
+                                        ))
+                                  ],
                                 ),
                               ),
-                              YaruTile(
-                                leading: const Icon(YaruIcons.chat_text),
-                                title: YaruBorderContainer(
-                                  padding: const EdgeInsets.all(8),
-                                  child: SelectableText(item.talkContent),
+                              Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(padding: EdgeInsets.all(8), child: Icon(YaruIcons.chat_text),),
+                                    Expanded(
+                                        child: Padding(
+                                          padding: kMaterialListPadding,
+                                          child: YaruInfoBadge(
+                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                            yaruInfoType: YaruInfoType.information,
+                                            title: SelectableText(
+                                                item.talkContent),
+                                          ),
+                                        ))
+                                  ],
                                 ),
-                              )
+                              ),
                             ],
                           );
                         }

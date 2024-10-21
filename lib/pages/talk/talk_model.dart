@@ -46,7 +46,7 @@ class TalkModel extends SafeChangeNotifier {
     }
     notifyListeners();
     hasTalk = true;
-    talkQuestion = question;
+    talkQuestion = question.trim();
     notifyListeners();
     final stream = settingModel.client?.generateCompletionStream(request: GenerateCompletionRequest(
         model: settingModel.runningModel!.model!,
