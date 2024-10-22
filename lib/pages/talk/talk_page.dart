@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
+import 'package:ollama_gtk_client/utils/date_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -44,109 +43,20 @@ class _TalkPageState extends State<TalkPage> {
           children: [
             Expanded(
                 child: SingleChildScrollView(
-                  child: talkModel.historyList.isEmpty && (false == talkModel.hasTalk) ? Container() : ListView.builder(
+              child: talkModel.historyList.isEmpty
+                  ? Container()
+                  : ListView.builder(
                       shrinkWrap: true,
-                      itemCount: talkModel.historyList.length + 1,
+                      itemCount: talkModel.historyList.length,
                       itemBuilder: (context, index) {
-                        if(index == 0) {
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Icon(YaruIcons.user),
-                                    ),
-                                    Expanded(
-                                        child: Padding(
-                                      padding: kMaterialListPadding,
-                                      child: YaruInfoBadge(
-                                        borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                        yaruInfoType: YaruInfoType.success,
-                                        title: SelectableText(
-                                            talkModel.talkQuestion),
-                                      ),
-                                    ))
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                  padding: const EdgeInsets.all(8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(padding: EdgeInsets.all(8), child: Icon(YaruIcons.chat_text),),
-                                    Expanded(
-                                        child: Padding(
-                                          padding: kMaterialListPadding,
-                                          child: YaruInfoBadge(
-                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                            yaruInfoType: YaruInfoType.information,
-                                            title: SelectableText(
-                                                talkModel.talkContent),
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        }else {
-                          var item = talkModel.historyList[index - 1];
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Icon(YaruIcons.user),
-                                    ),
-                                    Expanded(
-                                        child: Padding(
-                                          padding: kMaterialListPadding,
-                                          child: YaruInfoBadge(
-                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                            yaruInfoType: YaruInfoType.success,
-                                            title: SelectableText(
-                                                item.talkQuestion),
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(padding: EdgeInsets.all(8), child: Icon(YaruIcons.chat_text),),
-                                    Expanded(
-                                        child: Padding(
-                                          padding: kMaterialListPadding,
-                                          child: YaruInfoBadge(
-                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                            yaruInfoType: YaruInfoType.information,
-                                            title: SelectableText(
-                                                item.talkContent),
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                      }
-                    ),
+                        return TalkInfoView(
+                            talkHistory: talkModel.historyList[index]);
+                      }),
             )),
             Padding(
-              padding: EdgeInsets.only(left: (YaruTheme.of(context).theme?.iconTheme.size??30 + 8), top: 30),
+              padding: EdgeInsets.only(
+                  left: (YaruTheme.of(context).theme?.iconTheme.size ?? 30 + 8),
+                  top: 30),
               child: UserQuestionWidget(
                 onSubmit: (String? question) {
                   talkModel.talk(question, settingModel);
@@ -186,7 +96,11 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     final settingModel = context.watch<SettingModel>();
     return Container(
       decoration: BoxDecoration(
-          border: Border.fromBorderSide(YaruTheme.of(context).theme!.inputDecorationTheme.border!.borderSide),
+          border: Border.fromBorderSide(YaruTheme.of(context)
+              .theme!
+              .inputDecorationTheme
+              .border!
+              .borderSide),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Column(
         children: [
@@ -225,19 +139,89 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       textStyle:
                           YaruTheme.of(context).theme?.textTheme.bodySmall,
                     ),
-                    icon: (true == talkModel.talkingStatus) ? const Icon(YaruIcons.stop, color: Colors.redAccent,)
+                    icon: (true == talkModel.talkingStatus)
+                        ? const Icon(
+                            YaruIcons.stop,
+                            color: Colors.redAccent,
+                          )
                         : const Icon(YaruIcons.send),
                     onPressed: () {
                       String submitText = _questionTextEditingController.text;
                       _questionTextEditingController.text = "";
                       widget.onSubmit(submitText);
                     },
-                    label: Text((true == talkModel.talkingStatus) ? "回答中..." : "发送")),
+                    label: Text(
+                        (true == talkModel.talkingStatus) ? "回答中..." : "发送")),
               ],
             ),
           )
         ],
       ),
+    );
+  }
+}
+
+//消息视图
+class TalkInfoView extends StatelessWidget {
+  final TalkHistory talkHistory;
+
+  const TalkInfoView({super.key, required this.talkHistory});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Icon(YaruIcons.user),
+            ),
+            Expanded(
+                child: Padding(
+              padding: kMaterialListPadding,
+              child: YaruInfoBadge(
+                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                yaruInfoType: YaruInfoType.success,
+                title: SelectableText(talkHistory.talkQuestion),
+              ),
+            ))
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Icon(YaruIcons.chat_text),
+            ),
+            Expanded(
+              child: Padding(
+              padding: kMaterialListPadding,
+              child: YaruInfoBadge(
+                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                yaruInfoType: YaruInfoType.information,
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SelectableText(talkHistory.talkContent == "" ? "思考中..." : talkHistory.talkContent),
+                    Row(
+                      children: [
+                        Expanded(child: Container()),
+                        Padding(padding: const EdgeInsets.only(top: 5),
+                          child: Text(talkHistory.model, style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ))
+          ],
+        ),
+
+      ],
     );
   }
 }

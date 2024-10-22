@@ -6,17 +6,8 @@ import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class TalkModel extends SafeChangeNotifier {
 
-  //是否已经开启对话
-  bool hasTalk = false;
-
   //对话状态
   bool talkingStatus = false;
-
-  //当前对话的问题
-  String talkQuestion = "";
-
-  //当前对话的回答内容
-  String talkContent = "";
 
   //问答历史
   List<TalkHistory> historyList = [];
@@ -25,6 +16,7 @@ class TalkModel extends SafeChangeNotifier {
 
   //开始询问
   Future<void> talk(String? question, SettingModel settingModel) async {
+    question = question?.trim();
     if(talkingStatus) {
       BotToast.showNotification(
         title: (_) =>  const Text("正在回答信息,请勿重复点击")
@@ -38,22 +30,31 @@ class TalkModel extends SafeChangeNotifier {
       notifyListeners();
       return;
     }
-    if(hasTalk) {
-      historyList.add(TalkHistory(talkQuestion: talkQuestion, talkContent: talkContent));
-      talkQuestion = "";
-      talkContent = "";
-      notifyListeners();
+    TalkHistory newTalk = TalkHistory(talkQuestion: question,
+        talkContent: "",
+        talkDateTime: DateTime.now(),
+        model: settingModel.runningModel?.model??""
+    );
+    List<TalkHistory> newHistoryList = [
+      newTalk
+    ];
+    if(historyList.isNotEmpty) {
+      var historyListSize = historyList.length;
+      for(int i = 0; i < historyListSize; i++) {
+        var history = historyList[i];
+        newHistoryList.add(history);
+      }
     }
-    notifyListeners();
-    hasTalk = true;
-    talkQuestion = question.trim();
+    newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
+    historyList = newHistoryList;
     notifyListeners();
     final stream = settingModel.client?.generateCompletionStream(request: GenerateCompletionRequest(
         model: settingModel.runningModel!.model!,
-        prompt: talkQuestion,
+        prompt: question,
     ));
     await for(final res in stream!) {
-      talkContent += res.response??'';
+      newTalk.talkContent += res.response??'';
+      historyList[0] = newTalk;
       notifyListeners();
     }
     talkingStatus = false;
@@ -62,11 +63,11 @@ class TalkModel extends SafeChangeNotifier {
 
   //清空历史
   void clearHistory() {
-    historyList = [];
     if(!talkingStatus) {
-      hasTalk = false;
-      talkQuestion = "";
-      talkContent = "";
+      historyList = [];
+    }else {
+      var newTalk = historyList[0];
+      historyList = [newTalk];
     }
     notifyListeners();
   }
@@ -82,6 +83,12 @@ class TalkHistory {
   //回答内容
   String talkContent;
 
-  TalkHistory({required this.talkQuestion, required this.talkContent});
+  //回答时间
+  DateTime talkDateTime;
+
+  //回答的模型
+  String model;
+
+  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model});
 
 }
