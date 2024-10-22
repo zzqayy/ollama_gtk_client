@@ -65,7 +65,7 @@ class _TalkPageState extends State<TalkPage> {
                                       padding: kMaterialListPadding,
                                       child: YaruInfoBadge(
                                         borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                        yaruInfoType: YaruInfoType.important,
+                                        yaruInfoType: YaruInfoType.success,
                                         title: SelectableText(
                                             talkModel.talkQuestion),
                                       ),
@@ -112,7 +112,7 @@ class _TalkPageState extends State<TalkPage> {
                                           padding: kMaterialListPadding,
                                           child: YaruInfoBadge(
                                             borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                            yaruInfoType: YaruInfoType.important,
+                                            yaruInfoType: YaruInfoType.success,
                                             title: SelectableText(
                                                 item.talkQuestion),
                                           ),
