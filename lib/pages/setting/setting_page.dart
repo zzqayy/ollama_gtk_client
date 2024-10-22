@@ -5,14 +5,12 @@ import 'package:yaru/yaru.dart';
 
 class SettingPage extends StatefulWidget {
 
-  const SettingPage({super.key});
+  final SettingModel settingModel;
+
+  const SettingPage({super.key, required this.settingModel});
 
   @override
   State<StatefulWidget> createState() => _SettingPageState();
-
-  static Widget create(context) {
-    return const SettingPage();
-  }
 }
 
 class _SettingPageState extends State<SettingPage> {
@@ -24,42 +22,39 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settingModel = context.watch<SettingModel>();
-    return YaruDetailPage(
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text("Ollama地址"),
-            subtitle: Text(settingModel.client?.baseUrl??""),
-            onTap: () {
-              showEditTextDialog(
-                  context: context,
-                  onSubmit: (String? value) async {
-                    await settingModel.changeClientFromBaseUrl(
+    return Column(
+      children: [
+        ListTile(
+          title: const Text("Ollama地址"),
+          subtitle: Text(widget.settingModel.client?.baseUrl??""),
+          onTap: () {
+            showEditTextDialog(
+                context: context,
+                onSubmit: (String? value) async {
+                  await widget.settingModel.changeClientFromBaseUrl(
                       baseUrl: value
-                    );
-                  },
-                  initVal: settingModel.client?.baseUrl ?? "",
-                  title: "Ollama服务地址设置"
-              );
-            },
-          ),
-          ListTile(
-            title: const Text("当前的模型"),
-            subtitle: Text(settingModel.runningModel?.model??""),
-            onTap: () {
-              showEditTextDialog(
-                  context: context,
-                  onSubmit: (String? value) async {
-                    await settingModel.changeRunningModel(value);
-                  },
-                  initVal: settingModel.runningModel?.model??"",
-                  title: "选择模型"
-              );
-            },
-          ),
-        ],
-      ),
+                  );
+                },
+                initVal: widget.settingModel.client?.baseUrl ?? "",
+                title: "Ollama服务地址设置"
+            );
+          },
+        ),
+        ListTile(
+          title: const Text("当前的模型"),
+          subtitle: Text(widget.settingModel.runningModel?.model??""),
+          onTap: () {
+            showEditTextDialog(
+                context: context,
+                onSubmit: (String? value) async {
+                  await widget.settingModel.changeRunningModel(value);
+                },
+                initVal: widget.settingModel.runningModel?.model??"",
+                title: "选择模型"
+            );
+          },
+        ),
+      ],
     );
   }
 }

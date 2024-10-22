@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
 import 'package:ollama_gtk_client/utils/date_utils.dart';
@@ -205,7 +206,13 @@ class TalkInfoView extends StatelessWidget {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SelectableText(talkHistory.talkContent == "" ? "思考中..." : talkHistory.talkContent),
+                    Markdown(
+                      padding: const EdgeInsets.all(8),
+                      data: talkHistory.talkContent == "" ? "思考中..." : talkHistory.talkContent,
+                      shrinkWrap: true,
+                      selectable: true,
+                      softLineBreak: true,
+                    ),
                     Row(
                       children: [
                         Expanded(child: Container()),

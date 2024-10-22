@@ -35,9 +35,4 @@ final menuPageItems = <PageItem>[
       pageBuilder: (context) => TalkPage.create(context),
       iconBuilder: (context, selected) => const Icon(YaruIcons.chat_bubble),
   ),
-  PageItem(
-    title: '设置',
-    pageBuilder: (context) => SettingPage.create(context),
-    iconBuilder: (context, selected) => const Icon(YaruIcons.settings),
-  ),
 ];

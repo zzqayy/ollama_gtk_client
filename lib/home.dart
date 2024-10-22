@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/home_page_item.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/setting_page.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -46,7 +47,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final homeModel = context.watch<HomeModel>();
-    final settingModel = context.watch<SettingModel>();
     return YaruMasterDetailPage(
       paneLayoutDelegate: const YaruResizablePaneDelegate(
         initialPaneSize: 280,
@@ -78,9 +78,9 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: YaruMasterTile(
           leading: Icon(YaruIcons.radiobox_filled, color: (true == homeModel.connectStatus) ? Colors.green : Colors.redAccent,),
-          title: Text(homeModel.version),
+          title: const Text("设置"),
           onTap: () {
-            homeModel.refreshStatus(settingModel);
+            showSettingsDialog(context);
           },
         ),
       ),
@@ -102,4 +102,37 @@ List<Widget>? buildActions(BuildContext context, PageItem item) {
 
 Widget? buildFloatingActionButton(BuildContext context, PageItem item) {
   return item.floatingActionButtonBuilder?.call(context);
+}
+
+Future<void> showSettingsDialog(BuildContext context) {
+  final model = context.read<SettingModel>();
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AnimatedBuilder(
+        animation: model,
+        builder: (context, child) {
+          return AlertDialog(
+            title: const YaruDialogTitleBar(
+              title: Text('设置'),
+            ),
+            titlePadding: EdgeInsets.zero,
+            contentPadding: const EdgeInsets.all(kYaruPagePadding),
+            content: SizedBox(
+              width: 400,
+              height: 300,
+              child: SettingPage(settingModel: model),
+            ),
+            actions: [
+              OutlinedButton(
+                onPressed: Navigator.of(context).pop,
+                child: const Text('关闭'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
