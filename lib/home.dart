@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
           ),
         ),
         ChangeNotifierProvider<SettingModel>(
-            create: (_) => SettingModel()
+            create: (_) => SettingModel(templates: [])
         )
       ],
       child: const HomePage(),

@@ -18,7 +18,7 @@ class SettingUtils {
     File settingFile = File("${appConfigDir.path}/$SETTING_NAME");
     if(!settingFile.existsSync()) {
       ///如果文件存在则加载文件配置
-      SettingModel settingModel = SettingModel();
+      SettingModel settingModel = SettingModel(templates: []);
       String jsonString = json.encode(settingModel);
       settingFile = await settingFile.writeAsString(jsonString);
     }
@@ -36,7 +36,7 @@ class SettingUtils {
   ///保存配置
   static Future<void> saveModel(SettingModel model) async {
     File propertiesFile = await getSettingPropertiesFile();
-    String jsonString = json.encode(model);
+    String jsonString = json.encode(model.toJson());
     await propertiesFile.writeAsString(jsonString);
   }
 
