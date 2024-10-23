@@ -9,8 +9,8 @@ class HomeModel extends SafeChangeNotifier {
   //ollama版本
   String version;
 
-  //清理
-  bool clearTalkStatus = false;
+  //回答状态
+  bool talkingStatus = false;
 
   HomeModel({required this.connectStatus, this.version = ""});
 
@@ -28,6 +28,12 @@ class HomeModel extends SafeChangeNotifier {
     }catch(e) {
       connectStatus = false;
     }
+    notifyListeners();
+  }
+
+  //更改说话状态
+  void changeTalkingStatus({required bool talkStatus}) {
+    talkingStatus = talkStatus;
     notifyListeners();
   }
 

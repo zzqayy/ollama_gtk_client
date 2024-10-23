@@ -27,6 +27,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    SettingModel settingModel = widget.settingModel;
     return Center(
       child: SimpleDialog(
         titlePadding: EdgeInsets.zero,
@@ -58,8 +59,8 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             child: TabBarView(
               controller: tabController,
               children: [
-                _cloudSettingWidget(),
-                _templateSettingWidget(),
+                _cloudSettingWidget(settingModel),
+                _templateSettingWidget(settingModel),
               ],
             ),
           ),
@@ -69,7 +70,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   }
 
   //模板设置
-  Widget _templateSettingWidget() {
+  Widget _templateSettingWidget(SettingModel settingModel) {
     return Column(
       children: [
         Padding(
@@ -83,7 +84,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                       context: context,
                       onSubmit: (TemplateModel value) {
                         //提交的模板
-                        widget.settingModel.addTemplate(value);
+                        settingModel.addTemplate(value);
                       });
                 },
               ),
@@ -102,14 +103,14 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
         ),
         Expanded(child: Padding(
           padding: const EdgeInsets.all(8),
-          child: widget.settingModel.templates.isEmpty
+          child: settingModel.templates.isEmpty
               ? Container()
               : SingleChildScrollView(
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: widget.settingModel.templates.length,
+                itemCount: settingModel.templates.length,
                 itemBuilder: (context, index) {
-                  var template = widget.settingModel.templates[index];
+                  var template = settingModel.templates[index];
                   return ListTile(
                     title: Text(template.templateName),
                     subtitle: Text(template.templateContent.length > 100
@@ -119,11 +120,11 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                         YaruIconButton(
                           icon: Icon(YaruIcons.trash, color: YaruColors.of(context).warning,),
                           onPressed: () {
-                            widget.settingModel.removeTemplate(index);
+                            settingModel.removeTemplate(index);
                           },
                         ) : YaruIconButton(
                         onPressed: () {
-                          widget.settingModel.switchChooseTemplate(context,
+                          settingModel.switchChooseTemplate(context,
                               type: SwitchChooseEnum.listIndex,
                               listIndex: index,
                               alwaysChoose: false
@@ -138,7 +139,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                           template: template,
                           onSubmit: (TemplateModel value) {
                             //提交的模板
-                            widget.settingModel.editTemplate(value, index);
+                            settingModel.editTemplate(value, index);
                           });
                     },
                   );
@@ -150,35 +151,35 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   }
 
   //服务设置
-  Widget _cloudSettingWidget() {
+  Widget _cloudSettingWidget(SettingModel settingModel) {
     return Column(
       children: [
         ListTile(
           title: const Text("Ollama地址"),
-          subtitle: Text(widget.settingModel.client?.baseUrl??""),
+          subtitle: Text(settingModel.client?.baseUrl??""),
           onTap: () {
             showEditTextDialog(
                 context: context,
                 onSubmit: (String? value) async {
-                  await widget.settingModel.changeClientFromBaseUrl(
+                  await settingModel.changeClientFromBaseUrl(
                       baseUrl: value
                   );
                 },
-                initVal: widget.settingModel.client?.baseUrl ?? "",
+                initVal: settingModel.client?.baseUrl ?? "",
                 title: "Ollama服务地址设置"
             );
           },
         ),
         ListTile(
           title: const Text("当前的模型"),
-          subtitle: Text(widget.settingModel.runningModel?.model??""),
+          subtitle: Text(settingModel.runningModel?.model??""),
           onTap: () {
             showEditTextDialog(
                 context: context,
                 onSubmit: (String? value) async {
-                  await widget.settingModel.changeRunningModel(value);
+                  await settingModel.changeRunningModel(value);
                 },
-                initVal: widget.settingModel.runningModel?.model??"",
+                initVal: settingModel.runningModel?.model??"",
                 title: "选择模型"
             );
           },

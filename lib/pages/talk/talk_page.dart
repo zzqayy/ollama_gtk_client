@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
-import 'package:ollama_gtk_client/utils/date_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -26,6 +26,7 @@ class TalkPage extends StatefulWidget {
 class _TalkPageState extends State<TalkPage> {
   @override
   Widget build(BuildContext context) {
+    final homeModel = context.watch<HomeModel>();
     final talkModel = context.watch<TalkModel>();
     final settingModel = context.watch<SettingModel>();
     return YaruDetailPage(
@@ -34,7 +35,7 @@ class _TalkPageState extends State<TalkPage> {
           YaruIconButton(
             icon: const Icon(YaruIcons.trash),
             onPressed: () {
-              talkModel.clearHistory();
+              talkModel.clearHistory(homeModel: homeModel);
             },
           ),
         ],
@@ -60,8 +61,13 @@ class _TalkPageState extends State<TalkPage> {
                   left: (YaruTheme.of(context).theme?.iconTheme.size ?? 30 + 8),
                   top: 30),
               child: UserQuestionWidget(
+                talkingStatus: homeModel.talkingStatus,
                 onSubmit: (String? question) {
-                  talkModel.talk(question, settingModel);
+                  talkModel.talk(context,
+                      question: question,
+                      settingModel: settingModel,
+                      homeModel: homeModel
+                  );
                 },
               ),
             ),
@@ -81,8 +87,9 @@ class _TalkPageState extends State<TalkPage> {
 //获取用户提问框
 class UserQuestionWidget extends StatefulWidget {
   final ValueChanged<String> onSubmit;
+  final bool talkingStatus;
 
-  const UserQuestionWidget({super.key, required this.onSubmit});
+  const UserQuestionWidget({super.key, required this.onSubmit, required this.talkingStatus});
 
   @override
   State<StatefulWidget> createState() => _UserQuestionWidgetState();
@@ -95,8 +102,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   ///处理Ctrl+Enter案件
   void _handleKeyDown(KeyEvent event) {
     if (event.logicalKey == LogicalKeyboardKey.enter && HardwareKeyboard.instance.isControlPressed) {
-      final talkModel = context.read<TalkModel>();
-      if(!talkModel.talkingStatus) {
+      if(!widget.talkingStatus) {
         String submitText = _questionTextEditingController.text;
         _questionTextEditingController.text = "";
         widget.onSubmit(submitText);
@@ -141,7 +147,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             autofocus: true,
             maxLength: 1000,
             maxLines: 3,
-            readOnly: talkModel.talkingStatus,
+            readOnly: widget.talkingStatus,
           )
           ),
           Padding(
@@ -150,7 +156,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
               children: [
                 const Padding(
                   padding: EdgeInsets.all(8),
-                  child: Text("模板助手"),
+                  child: Text("模板"),
                 ),
                 Padding(
                     padding: const EdgeInsets.all(8),
@@ -179,6 +185,10 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                                     ?.templateName ??"无"
                             ),
                           )),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text("模型"),
+                ),
                 Expanded(child: Text(
                   settingModel.runningModel?.model ?? "模型未选择",
                   style: YaruTheme.of(context).theme?.textTheme.bodySmall,
@@ -188,7 +198,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       textStyle:
                           YaruTheme.of(context).theme?.textTheme.bodySmall,
                     ),
-                    icon: (true == talkModel.talkingStatus)
+                    icon: (true == widget.talkingStatus)
                         ? const Icon(
                             YaruIcons.stop,
                             color: Colors.redAccent,
@@ -199,7 +209,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       _questionTextEditingController.text = "";
                       widget.onSubmit(submitText);
                     },
-                    label: Text((true == talkModel.talkingStatus)
+                    label: Text((true == widget.talkingStatus)
                         ? "回答中..."
                         : "发送(Ctrl+Enter)")),
               ],

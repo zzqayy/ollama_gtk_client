@@ -1,13 +1,12 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class TalkModel extends SafeChangeNotifier {
-
-  //对话状态
-  bool talkingStatus = false;
 
   //问答历史
   List<TalkHistory> historyList = [];
@@ -15,21 +14,25 @@ class TalkModel extends SafeChangeNotifier {
   TalkModel();
 
   //开始询问
-  Future<void> talk(String? question, SettingModel settingModel) async {
+  Future<void> talk(BuildContext context,
+      {required String? question,
+      required SettingModel settingModel,
+      required HomeModel homeModel}) async {
     question = question?.trim();
-    if(talkingStatus) {
-      BotToast.showNotification(
-        title: (_) =>  const Text("正在回答信息,请勿重复点击")
+    if(homeModel.talkingStatus) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("同一时间内只能回答一个问题,请勿重复请求回答"))
       );
       return;
     }
-    talkingStatus = true;
-    notifyListeners();
     if(question == null) {
-      talkingStatus = false;
+      homeModel.changeTalkingStatus(talkStatus: false);
       notifyListeners();
       return;
     }
+    homeModel.changeTalkingStatus(talkStatus: true);
+    notifyListeners();
+
     TemplateModel? templateModel = settingModel.templates.where((template) => template.chooseStatus).firstOrNull;
     TalkHistory newTalk = TalkHistory(talkQuestion: question,
       talkContent: "",
@@ -63,13 +66,13 @@ class TalkModel extends SafeChangeNotifier {
       historyList[0] = newTalk;
       notifyListeners();
     }
-    talkingStatus = false;
+    homeModel.changeTalkingStatus(talkStatus: false);
     notifyListeners();
   }
 
   //清空历史
-  void clearHistory() {
-    if(!talkingStatus) {
+  void clearHistory({required HomeModel homeModel}) {
+    if(!homeModel.talkingStatus) {
       historyList = [];
     }else {
       var newTalk = historyList[0];

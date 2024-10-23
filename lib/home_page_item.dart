@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ollama_gtk_client/pages/setting/setting_page.dart';
+import 'package:flutter/material.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_page.dart';
 import 'package:yaru/yaru.dart';
 

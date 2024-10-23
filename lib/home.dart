@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/home_page_item.dart';
@@ -40,8 +42,13 @@ class _HomePageState extends State<HomePage> {
   Future<void> _initData() async {
     var settingModel = context.read<SettingModel>();
     await settingModel.init();
-    context.read<HomeModel>()
+    await context.read<HomeModel>()
         .init(settingModel);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -49,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     final homeModel = context.watch<HomeModel>();
     return YaruMasterDetailPage(
       paneLayoutDelegate: const YaruResizablePaneDelegate(
-        initialPaneSize: 280,
+        initialPaneSize: 200,
         minPageSize: kYaruMasterDetailBreakpoint / 2,
         minPaneSize: 175,
       ),
@@ -70,7 +77,7 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: buildFloatingActionButton(context, menuPageItems[index]),
       ),
       appBar: YaruWindowTitleBar(
-        title: const Text('Ollama Talk'),
+        title: const Text('Ollama对话'),
         border: BorderSide.none,
         backgroundColor: YaruMasterDetailTheme.of(context).sideBarColor,
       ),
@@ -104,6 +111,7 @@ Widget? buildFloatingActionButton(BuildContext context, PageItem item) {
   return item.floatingActionButtonBuilder?.call(context);
 }
 
+//显示弹出层
 Future<void> showSettingsDialog(BuildContext context) {
   final model = context.read<SettingModel>();
 
