@@ -173,6 +173,16 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
         ListTile(
           title: const Text("当前的模型"),
           subtitle: Text(settingModel.runningModel?.model??""),
+          trailing: (settingModel.modelList == null || settingModel.modelList!.isEmpty) ? Container():
+          YaruSplitButton.outlined(
+            items: settingModel.modelList!.map((model) => PopupMenuItem(
+              child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
+              onTap: () {
+                settingModel.changeRunningModel(model.model);
+              },
+            )).toList() ,
+            child: Text(settingModel.runningModel?.model??"无"),
+          ),
           onTap: () {
             showEditTextDialog(
                 context: context,
@@ -184,6 +194,20 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             );
           },
         ),
+        // ListTile(
+        //   title: const Text("当前的模型"),
+        //   subtitle: Text(settingModel.runningModel?.model??""),
+        //   onTap: () {
+        //     showEditTextDialog(
+        //         context: context,
+        //         onSubmit: (String? value) async {
+        //           await settingModel.changeRunningModel(value);
+        //         },
+        //         initVal: settingModel.runningModel?.model??"",
+        //         title: "选择模型"
+        //     );
+        //   },
+        // ),
       ],
     );
   }

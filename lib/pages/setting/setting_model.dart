@@ -14,6 +14,9 @@ class SettingModel extends SafeChangeNotifier {
   //ollama的API地址
   OllamaClient? client;
 
+  //模块id
+  List<Model>? modelList = [];
+
   //模板列表
   List<TemplateModel> templates = [];
 
@@ -53,6 +56,9 @@ class SettingModel extends SafeChangeNotifier {
     this.client = settingModel.client;
     this.runningModel = settingModel.runningModel;
     this.templates = settingModel.templates;
+    //处理modelList
+    ModelsResponse? modelsResponse = await client?.listModels();
+    modelList = modelsResponse?.models??[];
     notifyListeners();
   }
 

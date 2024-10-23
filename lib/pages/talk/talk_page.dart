@@ -189,10 +189,19 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   padding: EdgeInsets.all(8),
                   child: Text("模型"),
                 ),
-                Expanded(child: Text(
-                  settingModel.runningModel?.model ?? "模型未选择",
-                  style: YaruTheme.of(context).theme?.textTheme.bodySmall,
-                )),
+                Expanded(child: YaruSplitButton.outlined(
+                  items: settingModel.modelList!.map((model) => PopupMenuItem(
+                    child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
+                    onTap: () {
+                      settingModel.changeRunningModel(model.model);
+                    },
+                  )).toList() ,
+                  child: Text(settingModel.runningModel?.model??"无"),
+                ),),
+                // Expanded(child: Text(
+                //   settingModel.runningModel?.model ?? "模型未选择",
+                //   style: YaruTheme.of(context).theme?.textTheme.bodySmall,
+                // )),
                 ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       textStyle:
