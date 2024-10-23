@@ -113,13 +113,72 @@ class SettingModel extends SafeChangeNotifier {
   }
 
   //选择模板
-  void chooseTemplates(int index) {
-    templates = templates.map((template) {
-      template.chooseStatus = false;
-      return template;
-    }).toList();
-    templates[index].chooseStatus = true;
+  void switchChooseTemplate(BuildContext context, {required SwitchChooseEnum type,
+     String? chooseName,
+     int? listIndex,
+     bool alwaysChoose = false
+  }) {
+    if(SwitchChooseEnum.listIndex == type && listIndex == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("index模式下,未传递index值"))
+      );
+      return;
+    }
+    if(SwitchChooseEnum.chooseName == type && chooseName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("name模式下,未传递name值"))
+      );
+      return;
+    }
+    //筛选选中的对象
+    int? chooseTemplateIndex;
+    for(int index = 0; index < templates.length; index++) {
+      var template = templates[index];
+      bool nameStatus = true;
+      if(chooseName != null) {
+        nameStatus = (template.templateName == chooseName);
+      }
+      bool indexStatus = true;
+      if(listIndex != null) {
+        indexStatus = (index == listIndex);
+      }
+      if(nameStatus && indexStatus) {
+        chooseTemplateIndex = index;
+        break;
+      }
+    }
+    //修改选中兑现值
+    if(chooseTemplateIndex == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("选中的模板不存在"))
+      );
+      return;
+    }
+    if(alwaysChoose) {
+      templates = templates.map((template) {
+        template.chooseStatus = false;
+        return template;
+      }).toList();
+      templates[chooseTemplateIndex].chooseStatus = true;
+    }else {
+      if(true == templates[chooseTemplateIndex].chooseStatus) {
+        templates[chooseTemplateIndex].chooseStatus = false;
+      }else {
+        templates = templates.map((template) {
+          template.chooseStatus = false;
+          return template;
+        }).toList();
+        templates[chooseTemplateIndex].chooseStatus = true;
+      }
+    }
     SettingUtils.saveModel(this);
+    notifyListeners();
+  }
+
+  //移除模板
+  Future<void> removeTemplate(int index) async {
+    templates.removeAt(index);
+    await SettingUtils.saveModel(this);
     notifyListeners();
   }
 
@@ -155,4 +214,10 @@ class TemplateModel {
     };
   }
 
+}
+
+//切换选择枚举
+enum SwitchChooseEnum {
+  listIndex,
+  chooseName;
 }

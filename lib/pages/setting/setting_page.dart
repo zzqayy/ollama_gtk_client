@@ -13,17 +13,144 @@ class SettingPage extends StatefulWidget {
   State<StatefulWidget> createState() => _SettingPageState();
 }
 
-class _SettingPageState extends State<SettingPage> {
+class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin  {
 
-  bool editStatus = false;
+  late TabController tabController;
+
+  bool _templateDelStatus = false;
 
   @override
   void initState() {
     super.initState();
+    tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
+    return Center(
+      child: SimpleDialog(
+        titlePadding: EdgeInsets.zero,
+        title: YaruDialogTitleBar(
+          leading: const Center(
+            child: Icon(YaruIcons.settings),
+          ),
+          title: SizedBox(
+            width: 500,
+            child: YaruTabBar(
+              tabController: tabController,
+              tabs: const [
+                YaruTab(
+                  label: '服务',
+                  icon: Icon(YaruIcons.cloud),
+                ),
+                YaruTab(
+                  label: '模板',
+                  icon: Icon(YaruIcons.task_list),
+                ),
+              ],
+            ),
+          ),
+        ),
+        children: [
+          SizedBox(
+            width: 600,
+            height: 400,
+            child: TabBarView(
+              controller: tabController,
+              children: [
+                _cloudSettingWidget(),
+                _templateSettingWidget(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //模板设置
+  Widget _templateSettingWidget() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              YaruIconButton(
+                icon: const Icon(YaruIcons.plus),
+                onPressed: () {
+                  showTemplateDialog(
+                      context: context,
+                      onSubmit: (TemplateModel value) {
+                        //提交的模板
+                        widget.settingModel.addTemplate(value);
+                      });
+                },
+              ),
+              Expanded(child: Container()),
+              YaruIconButton(
+                icon: (true == _templateDelStatus) ? Icon(YaruIcons.settings, color: YaruColors.of(context).warning,)
+                    : const Icon(YaruIcons.settings),
+                onPressed: () {
+                  setState(() {
+                    _templateDelStatus = !_templateDelStatus;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: widget.settingModel.templates.isEmpty
+              ? Container()
+              : SingleChildScrollView(
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.settingModel.templates.length,
+                itemBuilder: (context, index) {
+                  var template = widget.settingModel.templates[index];
+                  return ListTile(
+                    title: Text(template.templateName),
+                    subtitle: Text(template.templateContent.length > 100
+                        ? "${template.templateContent.substring(0, 100)}..."
+                        : template.templateContent),
+                    trailing: (true == _templateDelStatus) ?
+                        YaruIconButton(
+                          icon: Icon(YaruIcons.trash, color: YaruColors.of(context).warning,),
+                          onPressed: () {
+                            widget.settingModel.removeTemplate(index);
+                          },
+                        ) : YaruIconButton(
+                        onPressed: () {
+                          widget.settingModel.switchChooseTemplate(context,
+                              type: SwitchChooseEnum.listIndex,
+                              listIndex: index,
+                              alwaysChoose: false
+                          );
+                        },
+                        icon: Icon(true == template.chooseStatus
+                            ? YaruIcons.checkbox_checked
+                            : YaruIcons.checkbox)),
+                    onTap: () {
+                      showTemplateDialog(
+                          context: context,
+                          template: template,
+                          onSubmit: (TemplateModel value) {
+                            //提交的模板
+                            widget.settingModel.editTemplate(value, index);
+                          });
+                    },
+                  );
+                }),
+          ),
+        ),),
+      ],
+    );
+  }
+
+  //服务设置
+  Widget _cloudSettingWidget() {
     return Column(
       children: [
         ListTile(
@@ -56,69 +183,6 @@ class _SettingPageState extends State<SettingPage> {
             );
           },
         ),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              const Text("模板列表"),
-              Expanded(child: Container()),
-              YaruIconButton(
-                icon: const Icon(YaruIcons.document_new),
-                onPressed: () {
-                  showTemplateDialog(
-                      context: context, 
-                      onSubmit: (TemplateModel value) { 
-                        //提交的模板
-                        widget.settingModel.addTemplate(value);
-                      });
-                },
-              ),
-              YaruIconButton(
-                icon: const Icon(YaruIcons.pen),
-                onPressed: () {
-                  setState(() {
-                    editStatus = !editStatus;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.all(8),
-          child: widget.settingModel.templates.isEmpty
-              ? Container()
-              : SingleChildScrollView(
-            child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.settingModel.templates.length,
-                itemBuilder: (context, index) {
-                  var template = widget.settingModel.templates[index];
-                  return ListTile(
-                    title: Text(template.templateName),
-                    subtitle: Text(template.templateContent.length > 100
-                        ? "${template.templateContent.substring(0, 100)}..."
-                        : template.templateContent),
-                    trailing: IconButton(
-                        onPressed: () {
-                          widget.settingModel.chooseTemplates(index);
-                        },
-                        icon: Icon(true == template.chooseStatus
-                            ? YaruIcons.checkbox_checked
-                            : YaruIcons.checkbox)),
-                    onTap: () {
-                      showTemplateDialog(
-                          context: context,
-                          template: template,
-                          onSubmit: (TemplateModel value) {
-                            //提交的模板
-                            widget.settingModel.editTemplate(value, index);
-                          });
-                    },
-                  );
-                }),
-          ),
-        ),
       ],
     );
   }
@@ -135,56 +199,53 @@ Future<void> showTemplateDialog({required BuildContext context,
     barrierDismissible: false,
     context: context,
     builder: (context) {
-      return AlertDialog(
+      return SimpleDialog(
         title: const YaruDialogTitleBar(
           title: Text("模板"),
         ),
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.all(kYaruPagePadding),
-        content: SizedBox(
-          width: 400,
-          height: 400,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  decoration: const InputDecoration(hintText: "请输入名称"),
-                  maxLines: 1,
-                  controller: _nameController,
+        children: [
+          SizedBox(
+            width: 400,
+            height: 300,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    decoration: const InputDecoration(hintText: "请输入名称"),
+                    maxLines: 1,
+                    controller: _nameController,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  decoration: const InputDecoration(hintText: "请输入内容"),
-                  maxLines: 5,
-                  controller: _contentController,
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    decoration: const InputDecoration(hintText: "请输入内容"),
+                    maxLines: 5,
+                    controller: _contentController,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          ElevatedButton(onPressed: () {
-            TemplateModel newTmplate = TemplateModel(
-                templateName: _nameController.text,
-                templateContent: _contentController.text,
-              chooseStatus: template?.chooseStatus??false
-            );
-            onSubmit(newTmplate);
-            Navigator.of(context).pop();
-            _nameController.dispose();
-            _contentController.dispose();
-          }, child: const Text("提交")),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _nameController.dispose();
-              _contentController.dispose();
-            },
-            child: const Text('关闭'),
-          ),
+                Row(
+                  children: [
+                    Expanded(child: Container()),
+                    Padding(padding: EdgeInsets.all(8), child: ElevatedButton(onPressed: () {
+                      TemplateModel newTmplate = TemplateModel(
+                          templateName: _nameController.text,
+                          templateContent: _contentController.text,
+                          chooseStatus: template?.chooseStatus??false
+                      );
+                      onSubmit(newTmplate);
+                      Navigator.of(context).pop();
+                      _nameController.dispose();
+                      _contentController.dispose();
+                    }, child: const Text("提交")),),
+                  ],
+                )
+              ],
+            ),
+          )
         ],
       );
     },

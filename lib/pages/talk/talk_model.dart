@@ -30,10 +30,13 @@ class TalkModel extends SafeChangeNotifier {
       notifyListeners();
       return;
     }
+    TemplateModel? templateModel = settingModel.templates.where((template) => template.chooseStatus).firstOrNull;
     TalkHistory newTalk = TalkHistory(talkQuestion: question,
-        talkContent: "",
-        talkDateTime: DateTime.now(),
-        model: settingModel.runningModel?.model??""
+      talkContent: "",
+      talkDateTime: DateTime.now(),
+      model: settingModel.runningModel?.model??"",
+      templateName: templateModel?.templateName,
+      templateContent: templateModel?.templateContent
     );
     List<TalkHistory> newHistoryList = [
       newTalk
@@ -48,6 +51,9 @@ class TalkModel extends SafeChangeNotifier {
     newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
     historyList = newHistoryList;
     notifyListeners();
+    if(templateModel != null && templateModel.templateContent.contains("{{text}}")) {
+      question = templateModel.templateContent.replaceAll("{{text}}", question);
+    }
     final stream = settingModel.client?.generateCompletionStream(request: GenerateCompletionRequest(
         model: settingModel.runningModel!.model!,
         prompt: question,
@@ -89,6 +95,12 @@ class TalkHistory {
   //回答的模型
   String model;
 
-  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model});
+  //模板名称
+  String? templateName;
+
+  //模板内容
+  String? templateContent;
+
+  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model, this.templateName, this.templateContent});
 
 }

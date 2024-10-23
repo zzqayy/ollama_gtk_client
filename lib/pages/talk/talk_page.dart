@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
@@ -91,6 +92,18 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   final TextEditingController _questionTextEditingController =
       TextEditingController(text: "");
 
+  ///处理Ctrl+Enter案件
+  void _handleKeyDown(KeyEvent event) {
+    if (event.logicalKey == LogicalKeyboardKey.enter && HardwareKeyboard.instance.isControlPressed) {
+      final talkModel = context.read<TalkModel>();
+      if(!talkModel.talkingStatus) {
+        String submitText = _questionTextEditingController.text;
+        _questionTextEditingController.text = "";
+        widget.onSubmit(submitText);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final talkModel = context.watch<TalkModel>();
@@ -104,8 +117,12 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
               .borderSide),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
+          KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: _handleKeyDown,
+              child: TextField(
             decoration: const InputDecoration(
               hintText: "请输入内容",
               border: OutlineInputBorder(
@@ -125,13 +142,44 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             maxLength: 1000,
             maxLines: 3,
             readOnly: talkModel.talkingStatus,
+          )
           ),
           Padding(
             padding: const EdgeInsets.all(5),
             child: Row(
               children: [
-                Expanded(
-                    child: Text(
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text("模板助手"),
+                ),
+                Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: settingModel.templates.isEmpty
+                        ? Container()
+                        : YaruSplitButton.outlined(
+                            items: settingModel.templates
+                                .map((template) => PopupMenuItem(
+                                      child: Text(
+                                        template.templateName,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      onTap: () {
+                                        settingModel.switchChooseTemplate(context,
+                                            type: SwitchChooseEnum.chooseName,
+                                            chooseName: template.templateName,
+                                            alwaysChoose: true
+                                        );
+                                      },
+                                    ))
+                                .toList(),
+                            child: Text(settingModel.templates
+                                    .where((template) =>
+                                        true == template.chooseStatus)
+                                    .firstOrNull
+                                    ?.templateName ??"无"
+                            ),
+                          )),
+                Expanded(child: Text(
                   settingModel.runningModel?.model ?? "模型未选择",
                   style: YaruTheme.of(context).theme?.textTheme.bodySmall,
                 )),
@@ -151,8 +199,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       _questionTextEditingController.text = "";
                       widget.onSubmit(submitText);
                     },
-                    label: Text(
-                        (true == talkModel.talkingStatus) ? "回答中..." : "发送")),
+                    label: Text((true == talkModel.talkingStatus)
+                        ? "回答中..."
+                        : "发送(Ctrl+Enter)")),
               ],
             ),
           )
@@ -215,10 +264,13 @@ class TalkInfoView extends StatelessWidget {
                     ),
                     Row(
                       children: [
+                        Padding(padding: const EdgeInsets.only(top: 5),
+                          child: Text(talkHistory.templateName??"", style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                        ),
                         Expanded(child: Container()),
                         Padding(padding: const EdgeInsets.only(top: 5),
                           child: Text(talkHistory.model, style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
-                        )
+                        ),
                       ],
                     )
                   ],

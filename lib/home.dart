@@ -113,24 +113,7 @@ Future<void> showSettingsDialog(BuildContext context) {
       return AnimatedBuilder(
         animation: model,
         builder: (context, child) {
-          return AlertDialog(
-            title: const YaruDialogTitleBar(
-              title: Text('设置'),
-            ),
-            titlePadding: EdgeInsets.zero,
-            contentPadding: const EdgeInsets.all(kYaruPagePadding),
-            content: SizedBox(
-              width: 400,
-              height: 300,
-              child: SettingPage(settingModel: model),
-            ),
-            actions: [
-              OutlinedButton(
-                onPressed: Navigator.of(context).pop,
-                child: const Text('关闭'),
-              ),
-            ],
-          );
+          return SettingPage(settingModel: model);
         },
       );
     },
