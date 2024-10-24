@@ -54,15 +54,30 @@ class TalkModel extends SafeChangeNotifier {
     newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
     historyList = newHistoryList;
     notifyListeners();
-    if(templateModel != null && templateModel.templateContent.contains("{{text}}")) {
-      question = templateModel.templateContent.replaceAll("{{text}}", question);
+    List<Message> messageList = [];
+    for (var history in newHistoryList.reversed) {
+      //构建模板消息
+      if(history.templateContent != null && history.templateContent!.isEmpty) {
+        Message templateMessage = Message(role: MessageRole.system, content: history.templateContent??"");
+        messageList.add(templateMessage);
+      }
+      //构建用户消息
+      if(history.talkQuestion != "") {
+        Message userQuestionMessage = Message(role: MessageRole.user, content: history.talkQuestion);
+        messageList.add(userQuestionMessage);
+      }
+      //构建助手回复消息
+      if(history.talkContent != "") {
+        Message assistantMessage = Message(role: MessageRole.assistant, content: history.talkContent);
+        messageList.add(assistantMessage);
+      }
     }
-    final stream = settingModel.client?.generateCompletionStream(request: GenerateCompletionRequest(
+    final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
         model: settingModel.runningModel!.model!,
-        prompt: question,
+        messages: messageList
     ));
-    await for(final res in stream!) {
-      newTalk.talkContent += res.response??'';
+    await for(final res in generated!) {
+      newTalk.talkContent += res.message.content??'';
       historyList[0] = newTalk;
       notifyListeners();
     }

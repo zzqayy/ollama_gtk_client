@@ -102,9 +102,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   ///处理Ctrl+Enter案件
   void _handleKeyDown(KeyEvent event) {
     if (event.logicalKey == LogicalKeyboardKey.enter && HardwareKeyboard.instance.isControlPressed) {
+      String submitText = _questionTextEditingController.text;
+      _questionTextEditingController.text = "";
       if(!widget.talkingStatus) {
-        String submitText = _questionTextEditingController.text;
-        _questionTextEditingController.text = "";
         widget.onSubmit(submitText);
       }
     }
@@ -112,7 +112,6 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final talkModel = context.watch<TalkModel>();
     final settingModel = context.watch<SettingModel>();
     return Container(
       decoration: BoxDecoration(
@@ -198,10 +197,6 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   )).toList() ,
                   child: Text(settingModel.runningModel?.model??"无"),
                 ),),
-                // Expanded(child: Text(
-                //   settingModel.runningModel?.model ?? "模型未选择",
-                //   style: YaruTheme.of(context).theme?.textTheme.bodySmall,
-                // )),
                 ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       textStyle:
