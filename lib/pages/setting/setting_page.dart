@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -121,7 +124,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                       context: context,
                       onSubmit: (TemplateModel value) {
                         //提交的模板
-                        settingModel.addTemplate(value);
+                        settingModel.saveTemplate(value: value);
                       });
                 },
               ),
@@ -176,7 +179,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                           template: template,
                           onSubmit: (TemplateModel value) {
                             //提交的模板
-                            settingModel.editTemplate(value, index);
+                            settingModel.saveTemplate(value: value, index: index);
                           });
                     },
                   );
@@ -221,13 +224,27 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             child: Text(settingModel.runningModel?.model??"无"),
           ),
           onTap: () {
-            showEditTextDialog(
-                context: context,
-                onSubmit: (String? value) async {
-                  await settingModel.changeRunningModel(value);
-                },
-                initVal: settingModel.runningModel?.model??"",
-                title: "选择模型"
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                AIModelSettingModel? aiModelSettingModel = settingModel.modelSettingList?.where((modelSetting) => modelSetting.modelName == settingModel.runningModel?.model).firstOrNull;
+                return ModelSettingPage(
+                    aiModelSettingModel: aiModelSettingModel ??
+                        AIModelSettingModel(
+                            modelName: settingModel.runningModel?.model ?? "",
+                            options: const RequestOptions(
+                                temperature: 0.8,
+                                topP: 0.9,
+                                presencePenalty: 0.0,
+                                frequencyPenalty: 0.0)
+                        ),
+                  onSubmit: (aiModelSettingModel) async {
+                      await settingModel.saveAIModelSetting(aiModelSettingModel);
+                      Navigator.of(context).pop();
+                  },
+                );
+              },
             );
           },
         ),
@@ -237,74 +254,17 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
 }
 
 //添加,编辑模板
-Future<void> showTemplateDialog({required BuildContext context,
+void showTemplateDialog({required BuildContext context,
   required ValueChanged<TemplateModel> onSubmit,
   TemplateModel? template
 }) {
-  TextEditingController _nameController = TextEditingController(text: template?.templateName??"");
-  TextEditingController _assistantController = TextEditingController(text: template?.assistantDesc??"");
-  TextEditingController _contentController = TextEditingController(text: template?.templateContent??"");
-  return showDialog(
+  showDialog(
     barrierDismissible: false,
     context: context,
     builder: (context) {
-      return SimpleDialog(
-        title: const YaruDialogTitleBar(
-          title: Text("模板设置"),
-        ),
-        titlePadding: EdgeInsets.zero,
-        contentPadding: const EdgeInsets.all(kYaruPagePadding),
-        children: [
-          SizedBox(
-            width: 400,
-            height: 300,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: TextField(
-                    decoration: const InputDecoration(hintText: "请输入助手名称"),
-                    maxLines: 1,
-                    controller: _nameController,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: TextField(
-                    decoration: const InputDecoration(hintText: "请输入助手设定"),
-                    maxLines: 5,
-                    controller: _assistantController,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: TextField(
-                    decoration: const InputDecoration(hintText: "请输入用户输入预处理(回答时,将{{text}}替换为实时输入信息)"),
-                    maxLines: 5,
-                    controller: _contentController,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(child: Container()),
-                    Padding(padding: EdgeInsets.all(8), child: ElevatedButton(onPressed: () {
-                      TemplateModel newTmplate = TemplateModel(
-                          templateName: _nameController.text,
-                          templateContent: _contentController.text,
-                          chooseStatus: template?.chooseStatus??false,
-                          assistantDesc: _assistantController.text
-                      );
-                      onSubmit(newTmplate);
-                      Navigator.of(context).pop();
-                      _nameController.dispose();
-                      _contentController.dispose();
-                    }, child: const Text("提交")),),
-                  ],
-                )
-              ],
-            ),
-          )
-        ],
+      return TemplateSettingPage(
+        templateModel: template,
+        onSubmit: onSubmit,
       );
     },
   );

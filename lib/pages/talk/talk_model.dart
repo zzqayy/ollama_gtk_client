@@ -38,7 +38,8 @@ class TalkModel extends SafeChangeNotifier {
       talkDateTime: DateTime.now(),
       model: settingModel.runningModel?.model??"",
       templateName: templateModel?.templateName,
-      templateContent: templateModel?.templateContent
+      templateContent: templateModel?.templateContent,
+      modelOptions: settingModel.modelSettingList!.where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options
     );
     List<TalkHistory> newHistoryList = [
       newTalk
@@ -56,13 +57,17 @@ class TalkModel extends SafeChangeNotifier {
     List<Message> messageList = [];
     for (var history in newHistoryList.reversed) {
       //构建模板消息
-      if(history.templateContent != null && history.templateContent!.isEmpty) {
+      if((history.assistantDesc??"") != "") {
         Message templateMessage = Message(role: MessageRole.system, content: history.templateContent??"");
         messageList.add(templateMessage);
       }
       //构建用户消息
       if(history.talkQuestion != "") {
-        Message userQuestionMessage = Message(role: MessageRole.user, content: history.talkQuestion);
+        String question = history.talkQuestion;
+        if((history.templateContent??"") != "" && history.templateContent!.contains("{{text}}")) {
+          question = history.templateContent?.replaceAll("{{text}}", question)??"";
+        }
+        Message userQuestionMessage = Message(role: MessageRole.user, content: question);
         messageList.add(userQuestionMessage);
       }
       //构建助手回复消息
@@ -74,7 +79,8 @@ class TalkModel extends SafeChangeNotifier {
     try {
       final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
           model: settingModel.runningModel!.model!,
-          messages: messageList
+          messages: messageList,
+          options: newTalk.modelOptions
       ));
       await for(final res in generated!) {
         historyList[0].talkContent += res.message.content??'';
@@ -141,6 +147,12 @@ class TalkHistory {
   //模板内容
   String? templateContent;
 
-  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model, this.templateName, this.templateContent});
+  //助手描述
+  String? assistantDesc;
+
+  //设置
+  RequestOptions? modelOptions;
+
+  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model, this.templateName, this.templateContent, this.assistantDesc, this.modelOptions});
 
 }

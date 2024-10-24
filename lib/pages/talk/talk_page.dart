@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/home_model.dart';
+import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
@@ -168,12 +171,58 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                           .firstOrNull
                           ?.templateName ??"无"
                       ),
+                      onPressed: () {
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (context) {
+                            return TemplateSettingPage(
+                              templateModel: settingModel.templates
+                                  .where((template) =>
+                              true == template.chooseStatus)
+                                  .firstOrNull,
+                              onSubmit: (value) {
+                                //提交的模板
+                                int index = settingModel.templates
+                                    .indexWhere((template) =>
+                                true == template.chooseStatus);
+                                settingModel.saveTemplate(value: value, index: index);
+                                Navigator.of(context).pop();
+                              },
+                            );
+                          },
+                        );
+                      },
                     )),
                 const Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5),
+                  padding: EdgeInsets.only(left: 5, right: 5),
                   child: Text("模型"),
                 ),
-                Expanded(child: YaruSplitButton.outlined(
+                YaruSplitButton.outlined(
+                  onPressed: (){
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        AIModelSettingModel? aiModelSettingModel = settingModel.modelSettingList?.where((modelSetting) => modelSetting.modelName == settingModel.runningModel?.model).firstOrNull;
+                        return ModelSettingPage(
+                          aiModelSettingModel: (aiModelSettingModel ??
+                              AIModelSettingModel(
+                                  modelName: settingModel.runningModel?.model ?? "",
+                                  options: const RequestOptions(
+                                      temperature: 0.8,
+                                      topP: 0.9,
+                                      presencePenalty: 0.0,
+                                      frequencyPenalty: 0.0)
+                              )),
+                          onSubmit: (aiModelSettingModel) {
+                            settingModel.saveAIModelSetting(aiModelSettingModel);
+                            Navigator.of(context).pop();
+                          },
+                        );
+                      },
+                    );
+                  },
                   items: settingModel.modelList!.map((model) => PopupMenuItem(
                     child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
                     onTap: () {
@@ -181,7 +230,8 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                     },
                   )).toList() ,
                   child: Text(settingModel.runningModel?.model??"无"),
-                ),),
+                ),
+                Expanded(child: Container()),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: widget.talkingStatus
@@ -245,7 +295,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             padding: const EdgeInsets.all(5),
             child: Row(
               children: [
-                Expanded(child: Container()),
+                Expanded(
+                    child: Container()
+                ),
                 ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       textStyle: YaruTheme.of(context).theme?.textTheme.bodySmall,
@@ -268,7 +320,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                         : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}")),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
