@@ -17,13 +17,16 @@ class SettingModel extends SafeChangeNotifier {
   //ollama的API地址
   OllamaClient? client;
 
-  //模块id
+  //本地模型列表
   List<Model>? modelList = [];
+
+  //模型设置列表
+  List<ModelSettingModel>? modelSettingList = [];
 
   //模板列表
   List<TemplateModel> templates = [];
 
-  SettingModel({this.runningModel, this.client, required this.templates, this.closeHideStatus = false});
+  SettingModel({this.runningModel, this.client, required this.templates, this.closeHideStatus = false, this.modelSettingList});
 
   static SettingModel fromJson(Map<String, dynamic> json) {
     dynamic templatesJsonStr = json['templates'];
@@ -38,21 +41,35 @@ class SettingModel extends SafeChangeNotifier {
       templates = list.map((e) => TemplateModel.fromJson(e)).toList();
     }
     bool closeHideStatus = json['closeHideStatus']??false;
+    dynamic modelSettingListJsonStr = json['modelSettingList'];
+    List<ModelSettingModel> modelSettingList = [];
+    if(modelSettingListJsonStr == null) {
+
+    }else if(modelSettingListJsonStr is List) {
+      modelSettingList = modelSettingListJsonStr.map((e) => ModelSettingModel.fromJson(e)).toList();
+    }else {
+      var modelSettingListJson = jsonDecode(modelSettingListJsonStr);
+      var list = List.from(modelSettingListJson);
+      modelSettingList = list.map((e) => ModelSettingModel.fromJson(e)).toList();
+    }
     return SettingModel(
         closeHideStatus: closeHideStatus,
         runningModel: Model(model: json['runningModel'] == "" ? null : json['runningModel']),
         client: OllamaClient(baseUrl: json['ollamaBaseUrl'] == "" ? null : json['ollamaBaseUrl']),
-        templates: templates
+        templates: templates,
+        modelSettingList: modelSettingList
     );
   }
 
   Map<String, dynamic> toJson() {
     List<Map<String, dynamic>> templateJson = templates.map((template) => template.toJson()).toList();
+    List<Map<String, dynamic>> modelSettingListJson = modelSettingList?.map((modelSetting) => modelSetting.toJson()).toList()??[];
     return {
       "closeHideStatus": closeHideStatus,
       "runningModel": runningModel?.model??"",
       "ollamaBaseUrl": client?.baseUrl??"",
       "templates": json.encode(templateJson),
+      "modelSettingList": json.encode(modelSettingListJson)
     };
   }
 
@@ -211,17 +228,21 @@ class TemplateModel {
   //名称
   String templateName;
 
-  //内容
+  //助手描述
+  String assistantDesc;
+
+  //用户预处理内容
   String templateContent;
 
   //选择状态
   bool chooseStatus;
 
-  TemplateModel({required this.templateName, required this.templateContent, this.chooseStatus = false});
+  TemplateModel({required this.templateName, required this.assistantDesc, required this.templateContent, this.chooseStatus = false});
 
   factory TemplateModel.fromJson(Map<String, dynamic> json) {
     return TemplateModel(
       templateName: json['templateName'],
+      assistantDesc: json['assistantDesc'],
       templateContent: json['templateContent'],
       chooseStatus: json['chooseStatus'] is bool ? json['chooseStatus'] : false
     );
@@ -230,6 +251,7 @@ class TemplateModel {
   Map<String, Object?> toJson() {
     return {
       "templateName": templateName,
+      "assistantDesc": assistantDesc,
       "templateContent": templateContent,
       "chooseStatus": chooseStatus
     };
@@ -241,4 +263,31 @@ class TemplateModel {
 enum SwitchChooseEnum {
   listIndex,
   chooseName;
+}
+
+//模板设置
+class ModelSettingModel {
+
+  //模型名称
+  String modelName;
+
+  //设置
+  RequestOptions? options;
+
+  ModelSettingModel({required this.modelName, this.options});
+
+  factory ModelSettingModel.fromJson(Map<String, dynamic> json) {
+    return ModelSettingModel(
+        modelName: json['modelName'],
+        options: RequestOptions.fromJson(json['options']),
+    );
+  }
+
+  Map<String, Object?> toJson() {
+    return {
+      "modelName": modelName,
+      "options": options?.toJson()
+    };
+  }
+
 }

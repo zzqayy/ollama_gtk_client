@@ -150,9 +150,9 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                   var template = settingModel.templates[index];
                   return ListTile(
                     title: Text(template.templateName),
-                    subtitle: Text(template.templateContent.length > 100
-                        ? "${template.templateContent.substring(0, 100)}..."
-                        : template.templateContent),
+                    subtitle: Text(template.assistantDesc.length > 100
+                        ? "${template.assistantDesc.substring(0, 100)}..."
+                        : template.assistantDesc),
                     trailing: (true == _templateDelStatus) ?
                         YaruIconButton(
                           icon: Icon(YaruIcons.trash, color: YaruColors.of(context).warning,),
@@ -242,6 +242,7 @@ Future<void> showTemplateDialog({required BuildContext context,
   TemplateModel? template
 }) {
   TextEditingController _nameController = TextEditingController(text: template?.templateName??"");
+  TextEditingController _assistantController = TextEditingController(text: template?.assistantDesc??"");
   TextEditingController _contentController = TextEditingController(text: template?.templateContent??"");
   return showDialog(
     barrierDismissible: false,
@@ -249,7 +250,7 @@ Future<void> showTemplateDialog({required BuildContext context,
     builder: (context) {
       return SimpleDialog(
         title: const YaruDialogTitleBar(
-          title: Text("模板"),
+          title: Text("模板设置"),
         ),
         titlePadding: EdgeInsets.zero,
         contentPadding: const EdgeInsets.all(kYaruPagePadding),
@@ -262,7 +263,7 @@ Future<void> showTemplateDialog({required BuildContext context,
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: TextField(
-                    decoration: const InputDecoration(hintText: "请输入名称"),
+                    decoration: const InputDecoration(hintText: "请输入助手名称"),
                     maxLines: 1,
                     controller: _nameController,
                   ),
@@ -270,7 +271,15 @@ Future<void> showTemplateDialog({required BuildContext context,
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: TextField(
-                    decoration: const InputDecoration(hintText: "请输入内容"),
+                    decoration: const InputDecoration(hintText: "请输入助手设定"),
+                    maxLines: 5,
+                    controller: _assistantController,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    decoration: const InputDecoration(hintText: "请输入用户输入预处理(回答时,将{{text}}替换为实时输入信息)"),
                     maxLines: 5,
                     controller: _contentController,
                   ),
@@ -282,7 +291,8 @@ Future<void> showTemplateDialog({required BuildContext context,
                       TemplateModel newTmplate = TemplateModel(
                           templateName: _nameController.text,
                           templateContent: _contentController.text,
-                          chooseStatus: template?.chooseStatus??false
+                          chooseStatus: template?.chooseStatus??false,
+                          assistantDesc: _assistantController.text
                       );
                       onSubmit(newTmplate);
                       Navigator.of(context).pop();
