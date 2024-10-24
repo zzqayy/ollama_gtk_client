@@ -163,7 +163,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             ),
             controller: _questionTextEditingController,
             autofocus: true,
-            maxLength: 1000,
+            // maxLength: 2000,
             maxLines: 3,
             readOnly: widget.talkingStatus,
           )
