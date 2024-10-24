@@ -32,11 +32,25 @@ class _TalkPageState extends State<TalkPage> {
     return YaruDetailPage(
       appBar: AppBar(
         actions: [
-          YaruIconButton(
-            icon: const Icon(YaruIcons.trash),
-            onPressed: () {
-              talkModel.clearHistory(homeModel: homeModel);
-            },
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: homeModel.talkingStatus
+                ? YaruIconButton(
+                    icon: const Icon(
+                      YaruIcons.stop,
+                      color: Colors.redAccent,
+                    ),
+                    onPressed: () {
+                      talkModel.stopTalk(context,
+                          settingModel: settingModel, homeModel: homeModel);
+                    },
+                  )
+                : YaruIconButton(
+                    icon: const Icon(YaruIcons.trash),
+                    onPressed: () {
+                      talkModel.clearHistory(homeModel: homeModel);
+                    },
+                  ),
           ),
         ],
       ),
@@ -272,57 +286,63 @@ class TalkInfoView extends StatelessWidget {
             Expanded(
               child: Padding(
               padding: kMaterialListPadding,
-              child: YaruInfoBadge(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                yaruInfoType: YaruInfoType.information,
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  YaruInfoBadge(
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    yaruInfoType: YaruInfoType.information,
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: Container()),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: hasStopBtnStatus
-                              ? OutlinedButton.icon(
-                                  icon: const Icon(
-                                    YaruIcons.stop,
-                                    color: Colors.redAccent,
-                                  ),
-                                  onPressed: () {
-                                    if(onCancel == null) {
-                                      return;
-                                    }
-                                    onCancel!();
-                                  },
-                                  label: Text("停止回答", style: YaruTheme.of(context).theme?.textTheme.bodySmall?.copyWith(
-                                    color: Colors.redAccent
-                                  ),),
-                                )
-                              : Container(),
+                        Markdown(
+                          padding: const EdgeInsets.all(8),
+                          data: (talkHistory.talkContent == "" && talkingStatus) ? "思考中..." : talkHistory.talkContent,
+                          shrinkWrap: true,
+                          selectable: true,
+                          softLineBreak: true,
                         ),
+                        Row(
+                          children: [
+                            Padding(padding: const EdgeInsets.only(top: 5),
+                              child: Text(talkHistory.templateName??"", style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                            ),
+                            Expanded(child: Container()),
+                            Padding(padding: const EdgeInsets.only(top: 5),
+                              child: Text(talkHistory.model, style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                            ),
+                          ],
+                        )
                       ],
                     ),
-                    Markdown(
-                      padding: const EdgeInsets.all(8),
-                      data: (talkHistory.talkContent == "" && talkingStatus) ? "思考中..." : talkHistory.talkContent,
-                      shrinkWrap: true,
-                      selectable: true,
-                      softLineBreak: true,
-                    ),
-                    Row(
-                      children: [
-                        Padding(padding: const EdgeInsets.only(top: 5),
-                          child: Text(talkHistory.templateName??"", style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
-                        ),
-                        Expanded(child: Container()),
-                        Padding(padding: const EdgeInsets.only(top: 5),
-                          child: Text(talkHistory.model, style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: hasStopBtnStatus
+                        ? OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              textStyle: YaruTheme.of(context)
+                                  .theme
+                                  ?.textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: Colors.redAccent),
+                              iconColor: Colors.redAccent,
+                              padding: const EdgeInsets.all(2),
+                            ),
+                            icon: const Icon(
+                              YaruIcons.stop,
+                            ),
+                            onPressed: () {
+                              if (onCancel == null) {
+                                return;
+                              }
+                              onCancel!();
+                            },
+                            label: const Text("停止"),
+                          )
+                        : Container(),
+                  ),
+                ],
               ),
             ))
           ],
