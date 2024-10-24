@@ -118,6 +118,10 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   final TextEditingController _questionTextEditingController =
       TextEditingController(text: "");
 
+  bool userMaxLineStatus = false;
+
+  bool hoverSubmitStatus = false;
+
   ///处理Ctrl+Enter案件
   void _handleKeyDown(KeyEvent event) {
     if (event.logicalKey == LogicalKeyboardKey.enter && HardwareKeyboard.instance.isControlPressed) {
@@ -143,6 +147,65 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 5, right: 5),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: const EdgeInsets.only(left: 5, right: 5),
+                  child: Text("模板"),
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 5),
+                    child: settingModel.templates.isEmpty
+                        ? Container()
+                        : YaruSplitButton.outlined(
+                      items: settingModel.templates
+                          .map((template) => PopupMenuItem(
+                        child: Text(
+                          template.templateName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () {
+                          settingModel.switchChooseTemplate(context,
+                              type: SwitchChooseEnum.chooseName,
+                              chooseName: template.templateName,
+                              alwaysChoose: true
+                          );
+                        },
+                      ))
+                          .toList(),
+                      child: Text(settingModel.templates
+                          .where((template) =>
+                      true == template.chooseStatus)
+                          .firstOrNull
+                          ?.templateName ??"无"
+                      ),
+                    )),
+                const Padding(
+                  padding: const EdgeInsets.only(left: 5, right: 5),
+                  child: Text("模型"),
+                ),
+                Expanded(child: YaruSplitButton.outlined(
+                  items: settingModel.modelList!.map((model) => PopupMenuItem(
+                    child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
+                    onTap: () {
+                      settingModel.changeRunningModel(model.model);
+                    },
+                  )).toList() ,
+                  child: Text(settingModel.runningModel?.model??"无"),
+                ),),
+                YaruIconButton(
+                  icon: userMaxLineStatus ? const Icon(YaruIcons.fullscreen_exit) : const Icon(YaruIcons.fullscreen),
+                  onPressed: () {
+                    setState(() {
+                      userMaxLineStatus = !userMaxLineStatus;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           KeyboardListener(
               focusNode: FocusNode(),
               onKeyEvent: _handleKeyDown,
@@ -164,7 +227,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             controller: _questionTextEditingController,
             autofocus: true,
             // maxLength: 2000,
-            maxLines: 3,
+            maxLines: userMaxLineStatus ? 15 : 3,
             readOnly: widget.talkingStatus,
           )
           ),
@@ -172,54 +235,10 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             padding: const EdgeInsets.all(5),
             child: Row(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text("模板"),
-                ),
-                Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: settingModel.templates.isEmpty
-                        ? Container()
-                        : YaruSplitButton.outlined(
-                            items: settingModel.templates
-                                .map((template) => PopupMenuItem(
-                                      child: Text(
-                                        template.templateName,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      onTap: () {
-                                        settingModel.switchChooseTemplate(context,
-                                            type: SwitchChooseEnum.chooseName,
-                                            chooseName: template.templateName,
-                                            alwaysChoose: true
-                                        );
-                                      },
-                                    ))
-                                .toList(),
-                            child: Text(settingModel.templates
-                                    .where((template) =>
-                                        true == template.chooseStatus)
-                                    .firstOrNull
-                                    ?.templateName ??"无"
-                            ),
-                          )),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text("模型"),
-                ),
-                Expanded(child: YaruSplitButton.outlined(
-                  items: settingModel.modelList!.map((model) => PopupMenuItem(
-                    child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
-                    onTap: () {
-                      settingModel.changeRunningModel(model.model);
-                    },
-                  )).toList() ,
-                  child: Text(settingModel.runningModel?.model??"无"),
-                ),),
+                Expanded(child: Container()),
                 ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      textStyle:
-                          YaruTheme.of(context).theme?.textTheme.bodySmall,
+                      textStyle: YaruTheme.of(context).theme?.textTheme.bodySmall,
                     ),
                     icon: (true == widget.talkingStatus)
                         ? const Icon(YaruIcons.light_bulb_on,)
@@ -229,9 +248,14 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       _questionTextEditingController.text = "";
                       widget.onSubmit(submitText);
                     },
+                    onHover: (bool status) {
+                      setState(() {
+                        hoverSubmitStatus = status;
+                      });
+                    },
                     label: Text((true == widget.talkingStatus)
                         ? "回答中..."
-                        : "发送(Ctrl+Enter)")),
+                        : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}")),
               ],
             ),
           )
