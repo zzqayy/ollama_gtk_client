@@ -10,7 +10,7 @@ a flutter app build with ubuntu style
 - [x] 对话功能
 - [x] 指定模型
 - [x] 指定模板
-- [ ] 调整对话时候的参数
+- [x] 调整对话时候的参数
   
 
 ## 打包
