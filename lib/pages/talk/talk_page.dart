@@ -69,7 +69,6 @@ class _TalkPageState extends State<TalkPage> {
                         return TalkInfoView(
                           talkingStatus: homeModel.talkingStatus,
                           talkHistory: talkModel.historyList[index],
-                          hasStopBtnStatus: (index == 0 && homeModel.talkingStatus),
                           onCancel: () {
                             talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
                           },
