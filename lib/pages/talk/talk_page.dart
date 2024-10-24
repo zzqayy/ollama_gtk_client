@@ -53,7 +53,13 @@ class _TalkPageState extends State<TalkPage> {
                       itemCount: talkModel.historyList.length,
                       itemBuilder: (context, index) {
                         return TalkInfoView(
-                            talkHistory: talkModel.historyList[index]);
+                          talkingStatus: homeModel.talkingStatus,
+                          talkHistory: talkModel.historyList[index],
+                          hasStopBtnStatus: (index == 0 && homeModel.talkingStatus),
+                          onCancel: () {
+                            talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
+                          },
+                        );
                       }),
             )),
             Padding(
@@ -203,10 +209,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                           YaruTheme.of(context).theme?.textTheme.bodySmall,
                     ),
                     icon: (true == widget.talkingStatus)
-                        ? const Icon(
-                            YaruIcons.stop,
-                            color: Colors.redAccent,
-                          )
+                        ? const Icon(YaruIcons.light_bulb_on,)
                         : const Icon(YaruIcons.send),
                     onPressed: () {
                       String submitText = _questionTextEditingController.text;
@@ -229,7 +232,13 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
 class TalkInfoView extends StatelessWidget {
   final TalkHistory talkHistory;
 
-  const TalkInfoView({super.key, required this.talkHistory});
+  final bool hasStopBtnStatus;
+
+  final VoidCallback? onCancel;
+
+  final bool talkingStatus;
+
+  const TalkInfoView({super.key, required this.talkHistory, this.hasStopBtnStatus = false, this.onCancel, this.talkingStatus = false});
 
   @override
   Widget build(BuildContext context) {
@@ -269,9 +278,34 @@ class TalkInfoView extends StatelessWidget {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Expanded(child: Container()),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: hasStopBtnStatus
+                              ? OutlinedButton.icon(
+                                  icon: const Icon(
+                                    YaruIcons.stop,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed: () {
+                                    if(onCancel == null) {
+                                      return;
+                                    }
+                                    onCancel!();
+                                  },
+                                  label: Text("停止回答", style: YaruTheme.of(context).theme?.textTheme.bodySmall?.copyWith(
+                                    color: Colors.redAccent
+                                  ),),
+                                )
+                              : Container(),
+                        ),
+                      ],
+                    ),
                     Markdown(
                       padding: const EdgeInsets.all(8),
-                      data: talkHistory.talkContent == "" ? "思考中..." : talkHistory.talkContent,
+                      data: (talkHistory.talkContent == "" && talkingStatus) ? "思考中..." : talkHistory.talkContent,
                       shrinkWrap: true,
                       selectable: true,
                       softLineBreak: true,

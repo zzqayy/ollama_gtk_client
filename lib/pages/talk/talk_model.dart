@@ -1,5 +1,4 @@
-import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/home_model.dart';
@@ -72,14 +71,25 @@ class TalkModel extends SafeChangeNotifier {
         messageList.add(assistantMessage);
       }
     }
-    final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
-        model: settingModel.runningModel!.model!,
-        messages: messageList
-    ));
-    await for(final res in generated!) {
-      newTalk.talkContent += res.message.content??'';
-      historyList[0] = newTalk;
-      notifyListeners();
+    try {
+      final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
+          model: settingModel.runningModel!.model!,
+          messages: messageList
+      ));
+      await for(final res in generated!) {
+        // newTalk.talkContent += res.message.content??'';
+        // historyList[0] = newTalk;
+        historyList[0].talkContent += res.message.content??'';
+        notifyListeners();
+      }
+    }catch(e) {
+      if(kDebugMode) {
+        print("回答停止: ${e.toString()}");
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("回答停止"))
+      );
+      return;
     }
     homeModel.changeTalkingStatus(talkStatus: false);
     notifyListeners();
@@ -94,6 +104,20 @@ class TalkModel extends SafeChangeNotifier {
       historyList = [newTalk];
     }
     notifyListeners();
+  }
+
+  //停止作答
+  Future<void> stopTalk(BuildContext context, {required SettingModel settingModel, required HomeModel homeModel}) async {
+    if(!homeModel.talkingStatus) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("当前不在回答信息无法停止"))
+      );
+      return;
+    }
+    settingModel.client?.endSession();
+    //重新构建client
+    await settingModel.changeClientFromBaseUrl(baseUrl: settingModel.client?.baseUrl);
+    homeModel.changeTalkingStatus(talkStatus: false);
   }
 
 }
