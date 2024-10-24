@@ -65,6 +65,8 @@ class SettingModel extends SafeChangeNotifier {
     //处理modelList
     ModelsResponse? modelsResponse = await client?.listModels();
     modelList = modelsResponse?.models??[];
+    //处理状态
+    closeHideStatus = settingModel.closeHideStatus;
     notifyListeners();
   }
 

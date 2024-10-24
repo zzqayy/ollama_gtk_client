@@ -82,7 +82,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
           padding: const EdgeInsets.all(8),
           child: ListTile(
             title: const Text("点击关闭按钮操作"),
-            subtitle: Text(settingModel.closeHideStatus ? "隐藏应用" : "关闭应用"),
+            subtitle: Text((true == settingModel.closeHideStatus) ? "隐藏应用" : "关闭应用"),
             trailing: YaruSplitButton.outlined(
               items: [
                 PopupMenuItem(
@@ -98,7 +98,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                   },
                 )
               ],
-              child: Text(settingModel.closeHideStatus ? "隐藏应用" : "关闭应用"),
+              child: Text((true == settingModel.closeHideStatus) ? "隐藏应用" : "关闭应用"),
             ),
           ),
         )

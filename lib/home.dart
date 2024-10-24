@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gtk/gtk.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/home_page_item.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
@@ -54,49 +56,61 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final homeModel = context.watch<HomeModel>();
-    var settingModel = context.watch<SettingModel>();
-    return YaruMasterDetailPage(
-      paneLayoutDelegate: const YaruResizablePaneDelegate(
-        initialPaneSize: 200,
-        minPageSize: kYaruMasterDetailBreakpoint / 2,
-        minPaneSize: 175,
-      ),
-      length: menuPageItems.length,
-      tileBuilder: (context, index, selected, availableWidth) => YaruMasterTile(
-        leading: menuPageItems[index].iconBuilder(context, selected),
-        title: Text(menuPageItems[index].title),
-      ),
-      pageBuilder: (context, index) => YaruDetailPage(
-        appBar: YaruWindowTitleBar(
-          backgroundColor: Colors.transparent,
-          border: BorderSide.none,
-          leading: Navigator.of(context).canPop() ? const YaruBackButton() : null,
-          title: buildTitle(context, menuPageItems[index]),
-          actions: buildActions(context, menuPageItems[index]),
-          onClose: (context) {
-            if(settingModel.closeHideStatus) {
-              YaruWindow.of(context).hide();
-            }else {
-              YaruWindow.of(context).close();
-            }
-          },
+    final settingModel = context.watch<SettingModel>();
+    return GtkApplication(
+      onCommandLine: (args) {
+        if(kDebugMode) {
+          print('command-line: $args');
+        }
+      },
+      onOpen: (files, hint) {
+        if(kDebugMode) {
+          print('open ($hint): $files');
+        }
+      },
+      child: YaruMasterDetailPage(
+        paneLayoutDelegate: const YaruResizablePaneDelegate(
+          initialPaneSize: 200,
+          minPageSize: kYaruMasterDetailBreakpoint / 2,
+          minPaneSize: 175,
         ),
-        body: menuPageItems[index].pageBuilder(context),
-        floatingActionButton: buildFloatingActionButton(context, menuPageItems[index]),
-      ),
-      appBar: YaruWindowTitleBar(
-        title: const Text('Ollama对话'),
-        border: BorderSide.none,
-        backgroundColor: YaruMasterDetailTheme.of(context).sideBarColor,
-      ),
-      bottomBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: YaruMasterTile(
-          leading: Icon(YaruIcons.radiobox_filled, color: (true == homeModel.connectStatus) ? Colors.green : Colors.redAccent,),
-          title: const Text("设置"),
-          onTap: () {
-            showSettingsDialog(context);
-          },
+        length: menuPageItems.length,
+        tileBuilder: (context, index, selected, availableWidth) => YaruMasterTile(
+          leading: menuPageItems[index].iconBuilder(context, selected),
+          title: Text(menuPageItems[index].title),
+        ),
+        pageBuilder: (context, index) => YaruDetailPage(
+          appBar: YaruWindowTitleBar(
+            backgroundColor: Colors.transparent,
+            border: BorderSide.none,
+            leading: Navigator.of(context).canPop() ? const YaruBackButton() : null,
+            title: buildTitle(context, menuPageItems[index]),
+            actions: buildActions(context, menuPageItems[index]),
+            onClose: (context) {
+              if(settingModel.closeHideStatus) {
+                YaruWindow.of(context).hide();
+              }else {
+                YaruWindow.of(context).close();
+              }
+            },
+          ),
+          body: menuPageItems[index].pageBuilder(context),
+          floatingActionButton: buildFloatingActionButton(context, menuPageItems[index]),
+        ),
+        appBar: YaruWindowTitleBar(
+          title: const Text('Ollama对话'),
+          border: BorderSide.none,
+          backgroundColor: YaruMasterDetailTheme.of(context).sideBarColor,
+        ),
+        bottomBar: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: YaruMasterTile(
+            leading: Icon(YaruIcons.radiobox_filled, color: (true == homeModel.connectStatus) ? Colors.green : Colors.redAccent,),
+            title: const Text("设置"),
+            onTap: () {
+              showSettingsDialog(context);
+            },
+          ),
         ),
       ),
     );
