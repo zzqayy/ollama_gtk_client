@@ -22,7 +22,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -40,6 +40,10 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             child: YaruTabBar(
               tabController: tabController,
               tabs: const [
+                YaruTab(
+                  label: '基础',
+                  icon: Icon(YaruIcons.application),
+                ),
                 YaruTab(
                   label: '服务',
                   icon: Icon(YaruIcons.cloud),
@@ -59,6 +63,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             child: TabBarView(
               controller: tabController,
               children: [
+                _baseSettingWidget(settingModel),
                 _cloudSettingWidget(settingModel),
                 _templateSettingWidget(settingModel),
               ],
@@ -66,6 +71,38 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
           ),
         ],
       ),
+    );
+  }
+
+  //基础设置
+  Widget _baseSettingWidget(SettingModel settingModel) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: ListTile(
+            title: const Text("点击关闭按钮操作"),
+            subtitle: Text(settingModel.closeHideStatus ? "隐藏应用" : "关闭应用"),
+            trailing: YaruSplitButton.outlined(
+              items: [
+                PopupMenuItem(
+                  child: const Text("关闭应用", overflow: TextOverflow.ellipsis,),
+                  onTap: () {
+                    settingModel.changeCloseHideStatus(false);
+                  },
+                ),
+                PopupMenuItem(
+                  child: const Text("隐藏应用", overflow: TextOverflow.ellipsis,),
+                  onTap: () {
+                    settingModel.changeCloseHideStatus(true);
+                  },
+                )
+              ],
+              child: Text(settingModel.closeHideStatus ? "隐藏应用" : "关闭应用"),
+            ),
+          ),
+        )
+      ],
     );
   }
 
@@ -194,20 +231,6 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             );
           },
         ),
-        // ListTile(
-        //   title: const Text("当前的模型"),
-        //   subtitle: Text(settingModel.runningModel?.model??""),
-        //   onTap: () {
-        //     showEditTextDialog(
-        //         context: context,
-        //         onSubmit: (String? value) async {
-        //           await settingModel.changeRunningModel(value);
-        //         },
-        //         initVal: settingModel.runningModel?.model??"",
-        //         title: "选择模型"
-        //     );
-        //   },
-        // ),
       ],
     );
   }

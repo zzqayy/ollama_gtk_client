@@ -8,6 +8,9 @@ import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class SettingModel extends SafeChangeNotifier {
 
+  //关闭时隐藏页面
+  bool closeHideStatus = false;
+
   //运行的模型
   Model? runningModel;
 
@@ -20,7 +23,7 @@ class SettingModel extends SafeChangeNotifier {
   //模板列表
   List<TemplateModel> templates = [];
 
-  SettingModel({this.runningModel, this.client, required this.templates});
+  SettingModel({this.runningModel, this.client, required this.templates, this.closeHideStatus = false});
 
   static SettingModel fromJson(Map<String, dynamic> json) {
     dynamic templatesJsonStr = json['templates'];
@@ -34,7 +37,9 @@ class SettingModel extends SafeChangeNotifier {
       var list = List.from(templatesJson);
       templates = list.map((e) => TemplateModel.fromJson(e)).toList();
     }
+    bool closeHideStatus = json['closeHideStatus']??false;
     return SettingModel(
+        closeHideStatus: closeHideStatus,
         runningModel: Model(model: json['runningModel'] == "" ? null : json['runningModel']),
         client: OllamaClient(baseUrl: json['ollamaBaseUrl'] == "" ? null : json['ollamaBaseUrl']),
         templates: templates
@@ -44,6 +49,7 @@ class SettingModel extends SafeChangeNotifier {
   Map<String, dynamic> toJson() {
     List<Map<String, dynamic>> templateJson = templates.map((template) => template.toJson()).toList();
     return {
+      "closeHideStatus": closeHideStatus,
       "runningModel": runningModel?.model??"",
       "ollamaBaseUrl": client?.baseUrl??"",
       "templates": json.encode(templateJson),
@@ -184,6 +190,13 @@ class SettingModel extends SafeChangeNotifier {
   //移除模板
   Future<void> removeTemplate(int index) async {
     templates.removeAt(index);
+    await SettingUtils.saveModel(this);
+    notifyListeners();
+  }
+
+  //修改关闭状态
+  Future<void> changeCloseHideStatus(bool preCloseHideStatus) async {
+    closeHideStatus = preCloseHideStatus;
     await SettingUtils.saveModel(this);
     notifyListeners();
   }

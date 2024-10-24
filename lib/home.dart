@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final homeModel = context.watch<HomeModel>();
+    var settingModel = context.watch<SettingModel>();
     return YaruMasterDetailPage(
       paneLayoutDelegate: const YaruResizablePaneDelegate(
         initialPaneSize: 200,
@@ -72,6 +73,13 @@ class _HomePageState extends State<HomePage> {
           leading: Navigator.of(context).canPop() ? const YaruBackButton() : null,
           title: buildTitle(context, menuPageItems[index]),
           actions: buildActions(context, menuPageItems[index]),
+          onClose: (context) {
+            if(settingModel.closeHideStatus) {
+              YaruWindow.of(context).hide();
+            }else {
+              YaruWindow.of(context).close();
+            }
+          },
         ),
         body: menuPageItems[index].pageBuilder(context),
         floatingActionButton: buildFloatingActionButton(context, menuPageItems[index]),
