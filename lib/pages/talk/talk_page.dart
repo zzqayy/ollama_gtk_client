@@ -30,30 +30,6 @@ class _TalkPageState extends State<TalkPage> {
     final talkModel = context.watch<TalkModel>();
     final settingModel = context.watch<SettingModel>();
     return YaruDetailPage(
-      appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: homeModel.talkingStatus
-                ? YaruIconButton(
-                    icon: const Icon(
-                      YaruIcons.stop,
-                      color: Colors.redAccent,
-                    ),
-                    onPressed: () {
-                      talkModel.stopTalk(context,
-                          settingModel: settingModel, homeModel: homeModel);
-                    },
-                  )
-                : YaruIconButton(
-                    icon: const Icon(YaruIcons.trash),
-                    onPressed: () {
-                      talkModel.clearHistory(homeModel: homeModel);
-                    },
-                  ),
-          ),
-        ],
-      ),
       body: Padding(
         padding: const EdgeInsets.all(5),
         child: Column(
@@ -88,6 +64,15 @@ class _TalkPageState extends State<TalkPage> {
                       homeModel: homeModel
                   );
                 },
+                onClearClick: () {
+                  talkModel.clearHistory(homeModel: homeModel);
+                },
+                onStopClick: () {
+                  talkModel.stopTalk(context,
+                      settingModel: settingModel,
+                      homeModel: homeModel
+                  );
+                },
               ),
             ),
           ],
@@ -107,8 +92,10 @@ class _TalkPageState extends State<TalkPage> {
 class UserQuestionWidget extends StatefulWidget {
   final ValueChanged<String> onSubmit;
   final bool talkingStatus;
+  final VoidCallback? onClearClick;
+  final VoidCallback? onStopClick;
 
-  const UserQuestionWidget({super.key, required this.onSubmit, required this.talkingStatus});
+  const UserQuestionWidget({super.key, required this.onSubmit, required this.talkingStatus, this.onClearClick, this.onStopClick});
 
   @override
   State<StatefulWidget> createState() => _UserQuestionWidgetState();
@@ -195,6 +182,29 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   )).toList() ,
                   child: Text(settingModel.runningModel?.model??"无"),
                 ),),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: widget.talkingStatus
+                      ? YaruIconButton(
+                    icon: const Icon(
+                      YaruIcons.stop,
+                      color: Colors.redAccent,
+                    ),
+                    onPressed: () {
+                      if(widget.onStopClick != null) {
+                        widget.onStopClick!();
+                      }
+                    },
+                  )
+                      : YaruIconButton(
+                    icon: const Icon(YaruIcons.trash),
+                    onPressed: () {
+                      if(widget.onClearClick != null) {
+                        widget.onClearClick!();
+                      }
+                    },
+                  ),
+                ),
                 YaruIconButton(
                   icon: userMaxLineStatus ? const Icon(YaruIcons.fullscreen_exit) : const Icon(YaruIcons.fullscreen),
                   onPressed: () {

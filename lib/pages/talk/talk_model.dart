@@ -77,8 +77,6 @@ class TalkModel extends SafeChangeNotifier {
           messages: messageList
       ));
       await for(final res in generated!) {
-        // newTalk.talkContent += res.message.content??'';
-        // historyList[0] = newTalk;
         historyList[0].talkContent += res.message.content??'';
         notifyListeners();
       }
