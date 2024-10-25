@@ -19,7 +19,7 @@ a flutter app build with ubuntu style
 | provider | 状态管理                   |
 | handy_window | 外观                     |
 | ollama_dart | ollama的调取实现            |
-| bot_toast | 消息通知(后面会去除)            |
+| bot_toast | 消息通知          |
 | flutter_distributor | 打包工具                   |
 | flutter_markdown | markdown显示             |
 | gtk | Canonical出品的GTK工具集合    |
