@@ -249,7 +249,10 @@ void showTemplateDialog({required BuildContext context,
     builder: (context) {
       return TemplateSettingPage(
         templateModel: template,
-        onSubmit: onSubmit,
+        onSubmit: (value) {
+          onSubmit(value);
+          Navigator.of(context).pop();
+        },
       );
     },
   );
