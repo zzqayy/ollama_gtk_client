@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
+import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class TalkModel extends SafeChangeNotifier {
@@ -19,14 +19,16 @@ class TalkModel extends SafeChangeNotifier {
       required HomeModel homeModel}) async {
     question = question?.trim();
     if(homeModel.talkingStatus) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("同一时间内只能回答一个问题,请勿重复请求回答"))
-      );
+      MessageUtils.errorWithContext(context, msg: "同一时间内只能回答一个问题,请勿重复请求回答");
       return;
     }
     if(question == null) {
       homeModel.changeTalkingStatus(talkStatus: false);
       notifyListeners();
+      return;
+    }
+    if(settingModel.modelSettingList == null) {
+      MessageUtils.errorWithContext(context, msg: "没有模型被找到,请选择模型");
       return;
     }
     homeModel.changeTalkingStatus(talkStatus: true);
@@ -87,12 +89,7 @@ class TalkModel extends SafeChangeNotifier {
         notifyListeners();
       }
     }catch(e) {
-      if(kDebugMode) {
-        print("回答停止: ${e.toString()}");
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("回答停止"))
-      );
+      MessageUtils.normalWithContext(context, msg: "回答停止");
       return;
     }
     homeModel.changeTalkingStatus(talkStatus: false);
@@ -113,14 +110,12 @@ class TalkModel extends SafeChangeNotifier {
   //停止作答
   Future<void> stopTalk(BuildContext context, {required SettingModel settingModel, required HomeModel homeModel}) async {
     if(!homeModel.talkingStatus) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("当前不在回答信息无法停止"))
-      );
+      MessageUtils.errorWithContext(context, msg: "当前不在回答信息无法停止");
       return;
     }
     settingModel.client?.endSession();
     //重新构建client
-    await settingModel.changeClientFromBaseUrl(baseUrl: settingModel.client?.baseUrl);
+    await settingModel.changeClientFromBaseUrl(context, baseUrl: settingModel.client?.baseUrl);
     homeModel.changeTalkingStatus(talkStatus: false);
   }
 

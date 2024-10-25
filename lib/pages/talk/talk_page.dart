@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
@@ -186,7 +187,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                                 int index = settingModel.templates
                                     .indexWhere((template) =>
                                 true == template.chooseStatus);
-                                settingModel.saveTemplate(value: value, index: index);
+                                settingModel.saveTemplate(context, value: value, index: index);
                                 Navigator.of(context).pop();
                               },
                             );
@@ -198,38 +199,14 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   padding: EdgeInsets.only(left: 5, right: 5),
                   child: Text("模型"),
                 ),
-                YaruSplitButton.outlined(
-                  onPressed: (){
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        AIModelSettingModel? aiModelSettingModel = settingModel.modelSettingList?.where((modelSetting) => modelSetting.modelName == settingModel.runningModel?.model).firstOrNull;
-                        return ModelSettingPage(
-                          aiModelSettingModel: (aiModelSettingModel ??
-                              AIModelSettingModel(
-                                  modelName: settingModel.runningModel?.model ?? "",
-                                  options: const RequestOptions(
-                                      temperature: 0.8,
-                                      topP: 0.9,
-                                      presencePenalty: 0.0,
-                                      frequencyPenalty: 0.0)
-                              )),
-                          onSubmit: (aiModelSettingModel) {
-                            settingModel.saveAIModelSetting(aiModelSettingModel);
-                            Navigator.of(context).pop();
-                          },
-                        );
-                      },
-                    );
-                  },
+                MyYaruSplitButton.outlined(
+                  onPressed: () => settingModel.showModelSettingDialog(context),
                   items: settingModel.modelList!.map((model) => PopupMenuItem(
                     child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
-                    onTap: () {
-                      settingModel.changeRunningModel(model.model);
-                    },
-                  )).toList() ,
-                  child: Text(settingModel.runningModel?.model??"无"),
+                    onTap: () => settingModel.changeRunningModel(context, modelName:model.model),
+                  )).toList(),
+                  child: Text(settingModel.runningModel?.model??"未选择"),
+                  onOptionsPressed: () async => await settingModel.refreshModelList(context),
                 ),
                 Expanded(child: Container()),
                 Padding(

@@ -1,8 +1,9 @@
 import 'dart:convert';
 
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
+import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:ollama_gtk_client/utils/setting_utils.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
 
@@ -74,52 +75,49 @@ class SettingModel extends SafeChangeNotifier {
   }
 
   //初始化
-  Future<void> init() async {
+  Future<void> init(BuildContext context) async {
     var settingModel = await SettingUtils.getSettingProperties();
     this.client = settingModel.client;
     this.runningModel = settingModel.runningModel;
     this.templates = settingModel.templates;
     //处理modelList
-    ModelsResponse? modelsResponse = await client?.listModels();
-    modelList = modelsResponse?.models??[];
+    refreshModelList(context);
     //处理状态
     closeHideStatus = settingModel.closeHideStatus;
     notifyListeners();
   }
 
   //修改client
-  Future<void> changeClientFromBaseUrl({required String? baseUrl}) async {
+  Future<void> changeClientFromBaseUrl(BuildContext context, {required String? baseUrl}) async {
     client = OllamaClient(
       baseUrl: baseUrl == "" ? null : baseUrl
     );
     await SettingUtils.saveModel(this);
+    await refreshModelList(context);
     notifyListeners();
   }
 
   //修改运行模型
-  Future<void> changeRunningModel(String? value) async {
-    value = value?.trim();
-    runningModel = Model(model: value);
+  Future<void> changeRunningModel(BuildContext context, {String? modelName}) async {
+    modelName = modelName?.trim();
+    runningModel = Model(model: modelName);
     await SettingUtils.saveModel(this);
-    if(value != null && value != "") {
+    if(modelName != null && modelName != "") {
       try{
-        var showModelInfo = await client?.showModelInfo(
+        await client?.showModelInfo(
             request: ModelInfoRequest(
-                model: value
+                model: modelName
             )
         );
       }catch(e) {
-        BotToast.showNotification(
-            title: (_) => const Text("模型未拉取"),
-          subtitle: (_) => const Text("请自行在命令行中拉取设备")
-        );
+        MessageUtils.errorWithContext(context, msg: "模型拉取失败,请自行去命令行拉取");
       }
     }
     notifyListeners();
   }
 
   //保存模板
-  Future<void> saveTemplate({required TemplateModel value, int index = -1}) async {
+  Future<void> saveTemplate(BuildContext context, {required TemplateModel value, int index = -1}) async {
     if(index < 0) {
       var firstTemplate = templates.where((template) => template.templateName == value.templateName).firstOrNull;
       if(firstTemplate == null) {
@@ -131,9 +129,7 @@ class SettingModel extends SafeChangeNotifier {
         await SettingUtils.saveModel(this);
         notifyListeners();
       }else {
-        BotToast.showNotification(
-            title: (_) => const Text("该名称的模板已存在")
-        );
+        MessageUtils.errorWithContext(context, msg: "该名称的模板已存在");
       }
     }else {
       templates[index] = value;
@@ -149,15 +145,11 @@ class SettingModel extends SafeChangeNotifier {
      bool alwaysChoose = false
   }) {
     if(SwitchChooseEnum.listIndex == type && listIndex == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("index模式下,未传递index值"))
-      );
+      MessageUtils.errorWithContext(context, msg: "index模式下,未传递index值");
       return;
     }
     if(SwitchChooseEnum.chooseName == type && chooseName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("name模式下,未传递name值"))
-      );
+      MessageUtils.errorWithContext(context, msg: "name模式下,未传递name值");
       return;
     }
     //筛选选中的对象
@@ -179,9 +171,7 @@ class SettingModel extends SafeChangeNotifier {
     }
     //修改选中兑现值
     if(chooseTemplateIndex == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("选中的模板不存在"))
-      );
+      MessageUtils.errorWithContext(context, msg: "选中的模板不存在");
       return;
     }
     if(alwaysChoose) {
@@ -233,11 +223,50 @@ class SettingModel extends SafeChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshModelList() async {
+  //刷新模型列表
+  Future<void> refreshModelList(BuildContext context) async {
     //处理modelList
-    ModelsResponse? modelsResponse = await client?.listModels();
-    modelList = modelsResponse?.models??[];
+    try{
+      ModelsResponse? modelsResponse = await client?.listModels();
+      modelList = modelsResponse?.models??[];
+      runningModel ??= (modelList?.isNotEmpty == true) ? modelList![0] : null;
+    }catch(e) {
+      modelList = [];
+      runningModel = null;
+      MessageUtils.errorWithContext(context, msg: "模型拉取失败,请自行去命令行拉取");
+      return;
+    }
     notifyListeners();
+  }
+
+  //显示模型设置页面
+  void showModelSettingDialog(BuildContext context) {
+    if(runningModel == null) {
+      MessageUtils.errorWithContext(context, msg: "无模型选中,无法设置");
+      return;
+    }
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        AIModelSettingModel? aiModelSettingModel = modelSettingList?.where((modelSetting) => modelSetting.modelName == runningModel?.model).firstOrNull;
+        return ModelSettingPage(
+          aiModelSettingModel: aiModelSettingModel ??
+              AIModelSettingModel(
+                  modelName: runningModel?.model ?? "",
+                  options: const RequestOptions(
+                      temperature: 0.8,
+                      topP: 0.9,
+                      presencePenalty: 0.0,
+                      frequencyPenalty: 0.0)
+              ),
+          onSubmit: (aiModelSettingModel) async {
+            await saveAIModelSetting(aiModelSettingModel);
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
   }
 
 }

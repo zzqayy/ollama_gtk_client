@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _initData() async {
     var settingModel = context.read<SettingModel>();
-    await settingModel.init();
+    await settingModel.init(context);
     await context.read<HomeModel>()
         .init(settingModel);
   }

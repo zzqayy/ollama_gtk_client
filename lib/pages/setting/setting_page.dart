@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
 import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
@@ -18,14 +19,21 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin  {
 
-  late TabController tabController;
+  late TabController _tabController;
 
   bool _templateDelStatus = false;
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,7 +49,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
           title: SizedBox(
             width: 500,
             child: YaruTabBar(
-              tabController: tabController,
+              tabController: _tabController,
               tabs: const [
                 YaruTab(
                   label: '基础',
@@ -64,7 +72,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             width: 600,
             height: 400,
             child: TabBarView(
-              controller: tabController,
+              controller: _tabController,
               children: [
                 _baseSettingWidget(settingModel),
                 _cloudSettingWidget(settingModel),
@@ -124,7 +132,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                       context: context,
                       onSubmit: (TemplateModel value) {
                         //提交的模板
-                        settingModel.saveTemplate(value: value);
+                        settingModel.saveTemplate(context, value: value);
                       });
                 },
               ),
@@ -179,7 +187,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                           template: template,
                           onSubmit: (TemplateModel value) {
                             //提交的模板
-                            settingModel.saveTemplate(value: value, index: index);
+                            settingModel.saveTemplate(context, value: value, index: index);
                           });
                     },
                   );
@@ -201,7 +209,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             showEditTextDialog(
                 context: context,
                 onSubmit: (String? value) async {
-                  await settingModel.changeClientFromBaseUrl(
+                  await settingModel.changeClientFromBaseUrl(context,
                       baseUrl: value
                   );
                 },
@@ -211,42 +219,19 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
           },
         ),
         ListTile(
-          title: const Text("当前的模型"),
+          title: const Text("模型"),
           subtitle: Text(settingModel.runningModel?.model??""),
-          trailing: (settingModel.modelList == null || settingModel.modelList!.isEmpty) ? Container():
-          YaruSplitButton.outlined(
+          trailing: MyYaruSplitButton.outlined(
             items: settingModel.modelList!.map((model) => PopupMenuItem(
               child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
               onTap: () {
-                settingModel.changeRunningModel(model.model);
+                settingModel.changeRunningModel(context, modelName: model.model);
               },
-            )).toList() ,
+            )).toList(),
             child: Text(settingModel.runningModel?.model??"无"),
+            onOptionsPressed: () async => await settingModel.refreshModelList(context),
           ),
-          onTap: () {
-            showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) {
-                AIModelSettingModel? aiModelSettingModel = settingModel.modelSettingList?.where((modelSetting) => modelSetting.modelName == settingModel.runningModel?.model).firstOrNull;
-                return ModelSettingPage(
-                    aiModelSettingModel: aiModelSettingModel ??
-                        AIModelSettingModel(
-                            modelName: settingModel.runningModel?.model ?? "",
-                            options: const RequestOptions(
-                                temperature: 0.8,
-                                topP: 0.9,
-                                presencePenalty: 0.0,
-                                frequencyPenalty: 0.0)
-                        ),
-                  onSubmit: (aiModelSettingModel) async {
-                      await settingModel.saveAIModelSetting(aiModelSettingModel);
-                      Navigator.of(context).pop();
-                  },
-                );
-              },
-            );
-          },
+          onTap: () => settingModel.showModelSettingDialog(context),
         ),
       ],
     );
@@ -269,8 +254,6 @@ void showTemplateDialog({required BuildContext context,
     },
   );
 }
-
-
 
 //统一的弹出层
 Future<void> showEditTextDialog({required BuildContext context,
