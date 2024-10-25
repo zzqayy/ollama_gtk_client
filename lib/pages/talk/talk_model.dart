@@ -27,10 +27,6 @@ class TalkModel extends SafeChangeNotifier {
       notifyListeners();
       return;
     }
-    if(settingModel.modelSettingList == null) {
-      MessageUtils.errorWithContext(context, msg: "没有模型被找到,请选择模型");
-      return;
-    }
     homeModel.changeTalkingStatus(talkStatus: true);
     notifyListeners();
 
@@ -41,7 +37,8 @@ class TalkModel extends SafeChangeNotifier {
       model: settingModel.runningModel?.model??"",
       templateName: templateModel?.templateName,
       templateContent: templateModel?.templateContent,
-      modelOptions: settingModel.modelSettingList!.where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options
+      modelOptions: (settingModel.modelSettingList??[]).where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options,
+      titleExpanded: false
     );
     List<TalkHistory> newHistoryList = [
       newTalk
@@ -119,6 +116,12 @@ class TalkModel extends SafeChangeNotifier {
     homeModel.changeTalkingStatus(talkStatus: false);
   }
 
+  //改变标题打开状态
+  void changeTitleOpenStatus(int index) {
+    historyList[index].titleExpanded = !historyList[index].titleExpanded;
+    notifyListeners();
+  }
+
 }
 
 //回答历史
@@ -148,6 +151,18 @@ class TalkHistory {
   //设置
   RequestOptions? modelOptions;
 
-  TalkHistory({required this.talkQuestion, required this.talkContent, required this.talkDateTime, required this.model, this.templateName, this.templateContent, this.assistantDesc, this.modelOptions});
+  //打开标记
+  bool titleExpanded;
+
+  TalkHistory({required this.talkQuestion,
+    required this.talkContent,
+    required this.talkDateTime,
+    required this.model,
+    this.templateName,
+    this.templateContent,
+    this.assistantDesc,
+    this.modelOptions,
+    this.titleExpanded = false
+  });
 
 }

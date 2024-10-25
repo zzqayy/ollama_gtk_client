@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:ollama_dart/ollama_dart.dart';
+import 'package:ollama_gtk_client/components/expend_text.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
 import 'package:ollama_gtk_client/home_model.dart';
-import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
@@ -51,6 +50,9 @@ class _TalkPageState extends State<TalkPage> {
                           talkHistory: talkModel.historyList[index],
                           onCancel: () {
                             talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
+                          },
+                          switchTitleExpanded: () {
+                            talkModel.changeTitleOpenStatus(index);
                           },
                         );
                       }),
@@ -306,6 +308,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
 
 //消息视图
 class TalkInfoView extends StatelessWidget {
+
   final TalkHistory talkHistory;
 
   final bool hasStopBtnStatus;
@@ -314,7 +317,9 @@ class TalkInfoView extends StatelessWidget {
 
   final bool talkingStatus;
 
-  const TalkInfoView({super.key, required this.talkHistory, this.hasStopBtnStatus = false, this.onCancel, this.talkingStatus = false});
+  final VoidCallback? switchTitleExpanded;
+
+  const TalkInfoView({super.key, required this.talkHistory, this.hasStopBtnStatus = false, this.onCancel, this.talkingStatus = false, this.switchTitleExpanded});
 
   @override
   Widget build(BuildContext context) {
@@ -333,7 +338,14 @@ class TalkInfoView extends StatelessWidget {
               child: YaruInfoBadge(
                 borderRadius: const BorderRadius.all(Radius.circular(5)),
                 yaruInfoType: YaruInfoType.success,
-                title: SelectableText(talkHistory.talkQuestion),
+                title: ExpandableText(talkHistory.talkQuestion,
+                  expanded: talkHistory.titleExpanded,
+                  switchExpanded: () {
+                    if(switchTitleExpanded != null) {
+                      switchTitleExpanded!();
+                    }
+                  },
+                ),
               ),
             ))
           ],

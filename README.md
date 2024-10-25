@@ -25,7 +25,7 @@ a flutter app build with ubuntu style
 | gtk | Canonical出品的GTK工具集合    |
 | yaru | Canonical出品的Ubuntu风味外观 |
 | safe_change_notifier | Canonical下的安全的同志管理     |
-  
+
 
 ## 打包
 安装打包插件
@@ -38,3 +38,17 @@ deb打包
 ```
 flutter_distributor package --platform linux --targets deb
 ```
+
+## 项目效果图
+
+### 默认图
+
+![默认界面](./doc/images/default.png)
+
+### 聊天图
+
+![聊天图](./doc/images/answer.png)
+
+### 设置图
+
+![设置图](./doc/images/settings.png)
