@@ -110,20 +110,44 @@ class UserQuestionWidget extends StatefulWidget {
   final bool talkingStatus;
   final VoidCallback? onClearClick;
   final VoidCallback? onStopClick;
+  final bool continuousAnswerStatus;
+  final ValueChanged<bool>? onSwitchContinuous;
 
-  const UserQuestionWidget({super.key, required this.onSubmit, required this.talkingStatus, this.onClearClick, this.onStopClick});
+  const UserQuestionWidget({super.key,
+    required this.onSubmit,
+    required this.talkingStatus,
+    this.onClearClick,
+    this.onStopClick,
+    this.continuousAnswerStatus = false,
+    this.onSwitchContinuous
+  });
 
   @override
   State<StatefulWidget> createState() => _UserQuestionWidgetState();
 }
 
 class _UserQuestionWidgetState extends State<UserQuestionWidget> {
+
   final TextEditingController _questionTextEditingController =
       TextEditingController(text: "");
 
   bool userMaxLineStatus = false;
 
   bool hoverSubmitStatus = false;
+
+  bool continuousAnswerStatus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    continuousAnswerStatus = widget.continuousAnswerStatus;
+  }
+
+  @override
+  void dispose() {
+    _questionTextEditingController.dispose();
+    super.dispose();
+  }
 
   ///处理Ctrl+Enter案件
   void _handleKeyDown(KeyEvent event) {
@@ -221,6 +245,18 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   onOptionsPressed: () async => await settingModel.refreshModelList(context),
                 ),
                 Expanded(child: Container()),
+                YaruCheckButton(
+                    value: continuousAnswerStatus,
+                    onChanged: (bool? status) {
+                      if(widget.onSwitchContinuous != null) {
+                        widget.onSwitchContinuous!((status??false));
+                      }
+                      setState(() {
+                        continuousAnswerStatus = (status??false);
+                      });
+                    },
+                    title: Text(continuousAnswerStatus ? "连续": "独立", style: Theme.of(context).textTheme.bodySmall,)
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: widget.talkingStatus

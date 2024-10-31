@@ -7,6 +7,9 @@ import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class TalkModel extends SafeChangeNotifier {
 
+  //连续的作答状态
+  bool continuousAnswerStatus = false;
+
   //当前回答的状态
   TalkHistory? currentTalk;
 
@@ -45,8 +48,11 @@ class TalkModel extends SafeChangeNotifier {
     );
     notifyListeners();
     List<Message> messageList = [];
-    historyList.reversed
-        .forEach((e) => messageList.addAll(e.toMessage()));
+    if(continuousAnswerStatus) {
+      //如果是连续作答,则加入
+      historyList.reversed
+          .forEach((e) => messageList.addAll(e.toMessage()));
+    }
     messageList.addAll(currentTalk!.toMessage());
     try {
       final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
@@ -123,6 +129,12 @@ class TalkModel extends SafeChangeNotifier {
   //改变标题打开状态
   void changeCurrentTitleOpenStatus() {
     currentTalk?.titleExpanded = !(currentTalk?.titleExpanded??false);
+    notifyListeners();
+  }
+
+  //改变作答状态
+  void changeContinuousAnswerStatus() {
+    continuousAnswerStatus = !continuousAnswerStatus;
     notifyListeners();
   }
 
