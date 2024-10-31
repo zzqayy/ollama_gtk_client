@@ -255,7 +255,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                         continuousAnswerStatus = (status??false);
                       });
                     },
-                    title: Text(continuousAnswerStatus ? "连续": "独立", style: Theme.of(context).textTheme.bodySmall,)
+                    title: Text("连续对话", style: Theme.of(context).textTheme.bodySmall,)
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
