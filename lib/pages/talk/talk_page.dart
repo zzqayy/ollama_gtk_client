@@ -37,6 +37,16 @@ class _TalkPageState extends State<TalkPage> {
         padding: const EdgeInsets.all(5),
         child: Column(
           children: [
+            (homeModel.talkingStatus && talkModel.currentTalk != null) ? TalkInfoView(
+              talkingStatus: homeModel.talkingStatus,
+              talkHistory: talkModel.currentTalk!,
+              onCancel: () {
+                talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
+              },
+              switchTitleExpanded: () {
+                talkModel.changeCurrentTitleOpenStatus();
+              },
+            ) : Container(),
             Expanded(
                 child: SingleChildScrollView(
               child: talkModel.historyList.isEmpty

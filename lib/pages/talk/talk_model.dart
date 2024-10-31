@@ -7,6 +7,9 @@ import 'package:safe_change_notifier/safe_change_notifier.dart';
 
 class TalkModel extends SafeChangeNotifier {
 
+  //当前回答的状态
+  TalkHistory? currentTalk;
+
   //问答历史
   List<TalkHistory> historyList = [];
 
@@ -31,7 +34,7 @@ class TalkModel extends SafeChangeNotifier {
     notifyListeners();
 
     TemplateModel? templateModel = settingModel.templates.where((template) => template.chooseStatus).firstOrNull;
-    TalkHistory newTalk = TalkHistory(talkQuestion: question,
+    currentTalk = TalkHistory(talkQuestion: question,
       talkContent: "",
       talkDateTime: DateTime.now(),
       model: settingModel.runningModel?.model??"",
@@ -40,51 +43,36 @@ class TalkModel extends SafeChangeNotifier {
       modelOptions: (settingModel.modelSettingList??[]).where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options,
       titleExpanded: false
     );
-    List<TalkHistory> newHistoryList = [
-      newTalk
-    ];
-    if(historyList.isNotEmpty) {
-      var historyListSize = historyList.length;
-      for(int i = 0; i < historyListSize; i++) {
-        var history = historyList[i];
-        newHistoryList.add(history);
-      }
-    }
-    newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
-    historyList = newHistoryList;
     notifyListeners();
     List<Message> messageList = [];
-    for (var history in newHistoryList.reversed) {
-      //构建模板消息
-      if((history.assistantDesc??"") != "") {
-        Message templateMessage = Message(role: MessageRole.system, content: history.templateContent??"");
-        messageList.add(templateMessage);
-      }
-      //构建用户消息
-      if(history.talkQuestion != "") {
-        String question = history.talkQuestion;
-        if((history.templateContent??"") != "" && history.templateContent!.contains("{{text}}")) {
-          question = history.templateContent?.replaceAll("{{text}}", question)??"";
-        }
-        Message userQuestionMessage = Message(role: MessageRole.user, content: question);
-        messageList.add(userQuestionMessage);
-      }
-      //构建助手回复消息
-      if(history.talkContent != "") {
-        Message assistantMessage = Message(role: MessageRole.assistant, content: history.talkContent);
-        messageList.add(assistantMessage);
-      }
-    }
+    historyList.reversed
+        .forEach((e) => messageList.addAll(e.toMessage()));
+    messageList.addAll(currentTalk!.toMessage());
     try {
       final generated = settingModel.client?.generateChatCompletionStream(request: GenerateChatCompletionRequest(
           model: settingModel.runningModel!.model!,
           messages: messageList,
-          options: newTalk.modelOptions
+          options: currentTalk?.modelOptions
       ));
       await for(final res in generated!) {
-        historyList[0].talkContent += res.message.content??'';
+        currentTalk!.talkContent += res.message.content??'';
         notifyListeners();
       }
+      //回答完成后入库
+      List<TalkHistory> newHistoryList = [
+        currentTalk!
+      ];
+      if(historyList.isNotEmpty) {
+        var historyListSize = historyList.length;
+        for(int i = 0; i < historyListSize; i++) {
+          var history = historyList[i];
+          newHistoryList.add(history);
+        }
+      }
+      newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
+      historyList = newHistoryList;
+      currentTalk = null;
+      notifyListeners();
     }catch(e) {
       MessageUtils.normalWithContext(context, msg: "回答停止");
       return;
@@ -95,12 +83,7 @@ class TalkModel extends SafeChangeNotifier {
 
   //清空历史
   void clearHistory({required HomeModel homeModel}) {
-    if(!homeModel.talkingStatus) {
-      historyList = [];
-    }else {
-      var newTalk = historyList[0];
-      historyList = [newTalk];
-    }
+    historyList = [];
     notifyListeners();
   }
 
@@ -111,6 +94,21 @@ class TalkModel extends SafeChangeNotifier {
       return;
     }
     settingModel.client?.endSession();
+    //将内容填充到历史里
+    List<TalkHistory> newHistoryList = [
+      currentTalk!
+    ];
+    if(historyList.isNotEmpty) {
+      var historyListSize = historyList.length;
+      for(int i = 0; i < historyListSize; i++) {
+        var history = historyList[i];
+        newHistoryList.add(history);
+      }
+    }
+    newHistoryList.sort((a, b) => b.talkDateTime.compareTo(a.talkDateTime));
+    historyList = newHistoryList;
+    currentTalk = null;
+    notifyListeners();
     //重新构建client
     await settingModel.changeClientFromBaseUrl(context, baseUrl: settingModel.client?.baseUrl);
     homeModel.changeTalkingStatus(talkStatus: false);
@@ -119,6 +117,12 @@ class TalkModel extends SafeChangeNotifier {
   //改变标题打开状态
   void changeTitleOpenStatus(int index) {
     historyList[index].titleExpanded = !historyList[index].titleExpanded;
+    notifyListeners();
+  }
+
+  //改变标题打开状态
+  void changeCurrentTitleOpenStatus() {
+    currentTalk?.titleExpanded = !(currentTalk?.titleExpanded??false);
     notifyListeners();
   }
 
@@ -164,5 +168,30 @@ class TalkHistory {
     this.modelOptions,
     this.titleExpanded = false
   });
+
+  //转换成消息
+  List<Message> toMessage() {
+    List<Message> messageList = [];
+    //构建模板消息
+    if((assistantDesc??"") != "") {
+      Message templateMessage = Message(role: MessageRole.system, content: templateContent??"");
+      messageList.add(templateMessage);
+    }
+    //构建用户消息
+    if(talkQuestion != "") {
+      String question = talkQuestion;
+      if((templateContent??"") != "" && templateContent!.contains("{{text}}")) {
+        question = templateContent?.replaceAll("{{text}}", question)??"";
+      }
+      Message userQuestionMessage = Message(role: MessageRole.user, content: question);
+      messageList.add(userQuestionMessage);
+    }
+    //构建助手回复消息
+    if(talkContent != "") {
+      Message assistantMessage = Message(role: MessageRole.assistant, content: talkContent);
+      messageList.add(assistantMessage);
+    }
+    return messageList;
+  }
 
 }
