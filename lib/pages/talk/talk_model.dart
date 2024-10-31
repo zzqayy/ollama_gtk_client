@@ -44,7 +44,8 @@ class TalkModel extends SafeChangeNotifier {
       templateName: templateModel?.templateName,
       templateContent: templateModel?.templateContent,
       modelOptions: (settingModel.modelSettingList??[]).where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options,
-      titleExpanded: false
+      titleExpanded: false,
+      continuousAnswerStatus: continuousAnswerStatus
     );
     notifyListeners();
     List<Message> messageList = [];
@@ -170,6 +171,9 @@ class TalkHistory {
   //打开标记
   bool titleExpanded;
 
+  //连续的作答状态
+  bool continuousAnswerStatus = false;
+
   TalkHistory({required this.talkQuestion,
     required this.talkContent,
     required this.talkDateTime,
@@ -178,7 +182,8 @@ class TalkHistory {
     this.templateContent,
     this.assistantDesc,
     this.modelOptions,
-    this.titleExpanded = false
+    this.titleExpanded = false,
+    this.continuousAnswerStatus = false,
   });
 
   //转换成消息
