@@ -64,7 +64,7 @@ class _ExpandableTextState extends State<ExpandableText> {
     final endSpan = TextSpan(
       text: linkText,
       recognizer: _tapGestureRecognizer,
-      style: YaruTheme.of(context).theme?.textTheme.bodyMedium?.copyWith(
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: YaruColors.of(context).link
       )
     );

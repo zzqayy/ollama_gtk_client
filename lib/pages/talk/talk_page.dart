@@ -27,6 +27,8 @@ class TalkPage extends StatefulWidget {
 }
 
 class _TalkPageState extends State<TalkPage> {
+
+
   @override
   Widget build(BuildContext context) {
     final homeModel = context.watch<HomeModel>();
@@ -37,39 +39,44 @@ class _TalkPageState extends State<TalkPage> {
         padding: const EdgeInsets.all(5),
         child: Column(
           children: [
-            (homeModel.talkingStatus && talkModel.currentTalk != null) ? TalkInfoView(
-              talkingStatus: homeModel.talkingStatus,
-              talkHistory: talkModel.currentTalk!,
-              onCancel: () {
-                talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
-              },
-              switchTitleExpanded: () {
-                talkModel.changeCurrentTitleOpenStatus();
-              },
-            ) : Container(),
             Expanded(
-                child: SingleChildScrollView(
-              child: talkModel.historyList.isEmpty
-                  ? Container()
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: talkModel.historyList.length,
-                      itemBuilder: (context, index) {
-                        return TalkInfoView(
-                          talkingStatus: homeModel.talkingStatus,
-                          talkHistory: talkModel.historyList[index],
-                          onCancel: () {
-                            talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
-                          },
-                          switchTitleExpanded: () {
-                            talkModel.changeTitleOpenStatus(index);
-                          },
-                        );
-                      }),
-            )),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    (homeModel.talkingStatus && talkModel.currentTalk != null) ? TalkInfoView(
+                      talkingStatus: homeModel.talkingStatus,
+                      talkHistory: talkModel.currentTalk!,
+                      onCancel: () {
+                        talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
+                      },
+                      switchTitleExpanded: () {
+                        talkModel.changeCurrentTitleOpenStatus();
+                      },
+                    ) : Container(),
+                    talkModel.historyList.isEmpty
+                        ? Container()
+                        : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: talkModel.historyList.length,
+                        itemBuilder: (context, index) {
+                          return TalkInfoView(
+                            talkingStatus: homeModel.talkingStatus,
+                            talkHistory: talkModel.historyList[index],
+                            onCancel: () {
+                              talkModel.stopTalk(context, settingModel: settingModel, homeModel: homeModel);
+                            },
+                            switchTitleExpanded: () {
+                              talkModel.changeTitleOpenStatus(index);
+                            },
+                          );
+                        }),
+                  ],
+                )
+            ),
+            ),
             Padding(
               padding: EdgeInsets.only(
-                  left: (YaruTheme.of(context).theme?.iconTheme.size ?? 30 + 8),
+                  left: (Theme.of(context).iconTheme.size ?? 30 + 8),
                   top: 30),
               child: UserQuestionWidget(
                 talkingStatus: homeModel.talkingStatus,
@@ -163,190 +170,193 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   @override
   Widget build(BuildContext context) {
     final settingModel = context.watch<SettingModel>();
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.fromBorderSide(YaruTheme.of(context)
-              .theme!
-              .inputDecorationTheme
-              .border!
-              .borderSide),
-          borderRadius: const BorderRadius.all(Radius.circular(10))),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 5, right: 5),
-            child: Row(
-              children: [
-                const Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5),
-                  child: Text("模板"),
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(left: 5, right: 5),
-                    child: settingModel.templates.isEmpty
-                        ? Container()
-                        : YaruSplitButton.outlined(
-                      items: settingModel.templates
-                          .map((template) => PopupMenuItem(
-                        child: Text(
-                          template.templateName,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: () {
-                          settingModel.switchChooseTemplate(context,
-                              type: SwitchChooseEnum.chooseName,
-                              chooseName: template.templateName,
-                              alwaysChoose: true
-                          );
-                        },
-                      ))
-                          .toList(),
-                      child: Text(settingModel.templates
-                          .where((template) =>
-                      true == template.chooseStatus)
-                          .firstOrNull
-                          ?.templateName ??"无"
-                      ),
-                      onPressed: () {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) {
-                            return TemplateSettingPage(
-                              templateModel: settingModel.templates
-                                  .where((template) =>
-                              true == template.chooseStatus)
-                                  .firstOrNull,
-                              onSubmit: (value) {
-                                //提交的模板
-                                int index = settingModel.templates
-                                    .indexWhere((template) =>
-                                true == template.chooseStatus);
-                                settingModel.saveTemplate(context, value: value, index: index);
-                                Navigator.of(context).pop();
-                              },
+    return SizedBox(
+      height: userMaxLineStatus ? MediaQuery.of(context).size.height - 100 : 200,
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.fromBorderSide(Theme.of(context)
+                .inputDecorationTheme
+                .border!
+                .borderSide),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 5, right: 5),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 5, right: 5),
+                    child: Text("模板"),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.only(left: 5, right: 5),
+                      child: settingModel.templates.isEmpty
+                          ? Container()
+                          : YaruSplitButton.outlined(
+                        items: settingModel.templates
+                            .map((template) => PopupMenuItem(
+                          child: Text(
+                            template.templateName,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () {
+                            settingModel.switchChooseTemplate(context,
+                                type: SwitchChooseEnum.chooseName,
+                                chooseName: template.templateName,
+                                alwaysChoose: true
                             );
                           },
-                        );
+                        ))
+                            .toList(),
+                        child: Text(settingModel.templates
+                            .where((template) =>
+                        true == template.chooseStatus)
+                            .firstOrNull
+                            ?.templateName ??"无"
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return TemplateSettingPage(
+                                templateModel: settingModel.templates
+                                    .where((template) =>
+                                true == template.chooseStatus)
+                                    .firstOrNull,
+                                onSubmit: (value) {
+                                  //提交的模板
+                                  int index = settingModel.templates
+                                      .indexWhere((template) =>
+                                  true == template.chooseStatus);
+                                  settingModel.saveTemplate(context, value: value, index: index);
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
+                        },
+                      )),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 5, right: 5),
+                    child: Text("模型"),
+                  ),
+                  MyYaruSplitButton.outlined(
+                    onPressed: () => settingModel.showModelSettingDialog(context),
+                    items: settingModel.modelList!.map((model) => PopupMenuItem(
+                      child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
+                      onTap: () => settingModel.changeRunningModel(context, modelName:model.model),
+                    )).toList(),
+                    child: Text(settingModel.runningModel?.model??"未选择"),
+                    onOptionsPressed: () async => await settingModel.refreshModelList(context),
+                  ),
+                  Expanded(child: Container()),
+                  YaruCheckButton(
+                      value: continuousAnswerStatus,
+                      onChanged: (bool? status) {
+                        if(widget.onSwitchContinuous != null) {
+                          widget.onSwitchContinuous!((status??false));
+                        }
+                        setState(() {
+                          continuousAnswerStatus = (status??false);
+                        });
                       },
-                    )),
-                const Padding(
-                  padding: EdgeInsets.only(left: 5, right: 5),
-                  child: Text("模型"),
-                ),
-                MyYaruSplitButton.outlined(
-                  onPressed: () => settingModel.showModelSettingDialog(context),
-                  items: settingModel.modelList!.map((model) => PopupMenuItem(
-                    child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
-                    onTap: () => settingModel.changeRunningModel(context, modelName:model.model),
-                  )).toList(),
-                  child: Text(settingModel.runningModel?.model??"未选择"),
-                  onOptionsPressed: () async => await settingModel.refreshModelList(context),
-                ),
-                Expanded(child: Container()),
-                YaruCheckButton(
-                    value: continuousAnswerStatus,
-                    onChanged: (bool? status) {
-                      if(widget.onSwitchContinuous != null) {
-                        widget.onSwitchContinuous!((status??false));
-                      }
-                      setState(() {
-                        continuousAnswerStatus = (status??false);
-                      });
-                    },
-                    title: Text("连续对话", style: Theme.of(context).textTheme.bodySmall,)
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: widget.talkingStatus
-                      ? YaruIconButton(
-                    icon: const Icon(
-                      YaruIcons.stop,
-                      color: Colors.redAccent,
+                      title: Text("连续对话", style: Theme.of(context).textTheme.bodySmall,)
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: widget.talkingStatus
+                        ? YaruIconButton(
+                      icon: const Icon(
+                        YaruIcons.stop,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () {
+                        if(widget.onStopClick != null) {
+                          widget.onStopClick!();
+                        }
+                      },
+                    )
+                        : YaruIconButton(
+                      icon: const Icon(YaruIcons.trash),
+                      onPressed: () {
+                        if(widget.onClearClick != null) {
+                          widget.onClearClick!();
+                        }
+                      },
                     ),
+                  ),
+                  YaruIconButton(
+                    icon: userMaxLineStatus ? const Icon(YaruIcons.fullscreen_exit) : const Icon(YaruIcons.fullscreen),
                     onPressed: () {
-                      if(widget.onStopClick != null) {
-                        widget.onStopClick!();
-                      }
-                    },
-                  )
-                      : YaruIconButton(
-                    icon: const Icon(YaruIcons.trash),
-                    onPressed: () {
-                      if(widget.onClearClick != null) {
-                        widget.onClearClick!();
-                      }
+                      setState(() {
+                        userMaxLineStatus = !userMaxLineStatus;
+                      });
                     },
                   ),
-                ),
-                YaruIconButton(
-                  icon: userMaxLineStatus ? const Icon(YaruIcons.fullscreen_exit) : const Icon(YaruIcons.fullscreen),
-                  onPressed: () {
-                    setState(() {
-                      userMaxLineStatus = !userMaxLineStatus;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          KeyboardListener(
-              focusNode: FocusNode(),
-              onKeyEvent: _handleKeyDown,
-              child: TextField(
-            decoration: const InputDecoration(
-              hintText: "请输入内容",
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+                ],
               ),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              filled: false,
             ),
-            controller: _questionTextEditingController,
-            autofocus: true,
-            // maxLength: 2000,
-            maxLines: userMaxLineStatus ? 15 : 3,
-            readOnly: widget.talkingStatus,
-          )
-          ),
-          Padding(
-            padding: const EdgeInsets.all(5),
-            child: Row(
-              children: [
-                Expanded(
-                    child: Container()
+            Expanded(
+                child: KeyboardListener(
+                    focusNode: FocusNode(),
+                    onKeyEvent: _handleKeyDown,
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: "请输入内容",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
+                        filled: false,
+                      ),
+                      controller: _questionTextEditingController,
+                      autofocus: true,
+                      maxLines: null,
+                      readOnly: widget.talkingStatus,
+                    )
                 ),
-                ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      textStyle: YaruTheme.of(context).theme?.textTheme.bodySmall,
-                    ),
-                    icon: (true == widget.talkingStatus)
-                        ? const Icon(YaruIcons.light_bulb_on,)
-                        : const Icon(YaruIcons.send),
-                    onPressed: () {
-                      String submitText = _questionTextEditingController.text;
-                      _questionTextEditingController.text = "";
-                      widget.onSubmit(submitText);
-                    },
-                    onHover: (bool status) {
-                      setState(() {
-                        hoverSubmitStatus = status;
-                      });
-                    },
-                    label: Text((true == widget.talkingStatus)
-                        ? "回答中..."
-                        : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}")),
-              ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container()
+                  ),
+                  ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      icon: (true == widget.talkingStatus)
+                          ? const Icon(YaruIcons.light_bulb_on,)
+                          : const Icon(YaruIcons.send),
+                      onPressed: () {
+                        String submitText = _questionTextEditingController.text;
+                        _questionTextEditingController.text = "";
+                        widget.onSubmit(submitText);
+                      },
+                      onHover: (bool status) {
+                        setState(() {
+                          hoverSubmitStatus = status;
+                        });
+                      },
+                      label: Text((true == widget.talkingStatus)
+                          ? "回答中..."
+                          : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}")),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -425,11 +435,11 @@ class TalkInfoView extends StatelessWidget {
                         Row(
                           children: [
                             Padding(padding: const EdgeInsets.only(top: 5),
-                              child: Text(talkHistory.templateName??"", style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                              child: Text(talkHistory.templateName??"", style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.right,),
                             ),
                             Expanded(child: Container()),
                             Padding(padding: const EdgeInsets.only(top: 5),
-                              child: Text(talkHistory.model, style: YaruTheme.of(context).theme?.textTheme.bodySmall, textAlign: TextAlign.right,),
+                              child: Text(talkHistory.model, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.right,),
                             ),
                           ],
                         )
@@ -441,11 +451,9 @@ class TalkInfoView extends StatelessWidget {
                     child: hasStopBtnStatus
                         ? OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              textStyle: YaruTheme.of(context)
-                                  .theme
-                                  ?.textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: Colors.redAccent),
+                              textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.redAccent
+                              ),
                               iconColor: Colors.redAccent,
                               padding: const EdgeInsets.all(2),
                             ),
