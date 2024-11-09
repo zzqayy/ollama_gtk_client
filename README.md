@@ -2,6 +2,35 @@
 
 a flutter app build with ubuntu style
 
+## 使用参数说明
+启动时支持简单的主题配置,比如:
+```shell
+ollama_gtk_client --theme=olive
+或
+ollama_gtk_client -t=olive
+```
+主题颜色支持:
+- orange,
+- bark,
+- sage,
+- olive,
+- viridian,
+- prussianGreen,
+- blue,
+- purple,
+- magenta,
+- red,
+- wartyBrown,
+- adwaitaBlue,
+- adwaitaTeal,
+- adwaitaGreen,
+- adwaitaYellow,
+- adwaitaOrange,
+- adwaitaRed,
+- adwaitaPink,
+- adwaitaPurple,
+- adwaitaSlate,
+
 ## 开始
 
 使用flutter编写的yaru风味的ollama客户端

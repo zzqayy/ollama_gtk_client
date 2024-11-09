@@ -7,6 +7,7 @@ import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/home_page_item.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_page.dart';
+import 'package:ollama_gtk_client/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -48,6 +49,16 @@ class _HomePageState extends State<HomePage> {
         .init(settingModel);
   }
 
+  Future<void> changeTheme(String? theme) async {
+    if(theme == null) {
+      return;
+    }
+    YaruVariant? yaruVariant = yaruVariantMap[theme];
+    if(yaruVariant != null) {
+      InheritedYaruVariant.apply(context, yaruVariant);
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -62,6 +73,10 @@ class _HomePageState extends State<HomePage> {
         if(kDebugMode) {
           print('command-line: $args');
         }
+        //主题设置配置
+        String? themeColor = (args.where((arg) => arg.startsWith("--theme=") || arg.startsWith("-t="))
+            .firstOrNull)?.replaceFirst("--theme=", "").replaceFirst("-t=", "").trim();
+        changeTheme(themeColor);
       },
       onOpen: (files, hint) {
         if(kDebugMode) {
