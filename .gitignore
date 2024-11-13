@@ -42,3 +42,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /dist/
+lib/src/xdg_desktop_portal.dart/.dart_tool
