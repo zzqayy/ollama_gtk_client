@@ -47,37 +47,45 @@ class _ModelSettingPageState extends State<TemplateSettingPage> {
       ),
       titlePadding: EdgeInsets.zero,
       contentPadding: const EdgeInsets.all(kYaruPagePadding),
-      content: SizedBox(
-        width: 500,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            YaruTile(
-              title: const Text("助手名称"),
-              subtitle: TextField(
-                decoration: const InputDecoration(hintText: "请输入助手名称"),
-                maxLines: 1,
-                controller: _nameController,
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 500,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              YaruTile(
+                title: const Text("助手名称"),
+                subtitle: TextField(
+                  decoration: const InputDecoration(hintText: "请输入助手名称"),
+                  maxLines: 1,
+                  controller: _nameController,
+                ),
               ),
-            ),
-            YaruTile(
-              title: const Text("助手设定"),
-              subtitle: TextField(
-                decoration: const InputDecoration(hintText: "请输入助手设定"),
-                maxLines: 5,
-                controller: _assistantController,
+              YaruTile(
+                title: const Text("助手设定"),
+                subtitle: TextField(
+                  decoration: const InputDecoration(hintText: "请输入助手设定"),
+                  maxLines: 5,
+                  controller: _assistantController,
+                ),
               ),
-            ),
-            YaruTile(
-              title: const Text("提问预处理"),
-              subtitle: TextField(
-                decoration: const InputDecoration(hintText: "请输入用户输入预处理(回答时,将{{text}}替换为实时输入信息)"),
-                maxLines: 5,
-                controller: _contentController,
+              YaruTile(
+                // title: const Text("对话提问预处理-请输入用户输入预处理(回答时,将{{text}}替换为实时输入信息)"),
+                title: Text.rich(TextSpan(
+                    text: "对话提问预处理",
+                    children: [
+                      TextSpan(text: " (回答时,将{{text}}替换为实时输入信息)", style: Theme.of(context).textTheme.bodySmall)
+                    ]
+                )),
+                subtitle: TextField(
+                  decoration: const InputDecoration(hintText: "请输入用户输入预处理(回答时,将{{text}}替换为实时输入信息)"),
+                  maxLines: 5,
+                  controller: _contentController,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
@@ -89,7 +97,7 @@ class _ModelSettingPageState extends State<TemplateSettingPage> {
                   templateName: _nameController.text,
                   templateContent: _contentController.text,
                   chooseStatus: widget.templateModel?.chooseStatus??false,
-                  assistantDesc: _assistantController.text
+                  assistantDesc: _assistantController.text,
                 )
               );
             }

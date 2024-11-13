@@ -21,8 +21,10 @@ class TalkModel extends SafeChangeNotifier {
   //开始询问
   Future<void> talk(BuildContext context,
       {required String? question,
-      required SettingModel settingModel,
-      required HomeModel homeModel}) async {
+        required SettingModel settingModel,
+        required HomeModel homeModel,
+        String? imageBase64Str
+      }) async {
     question = question?.trim();
     if(homeModel.talkingStatus) {
       MessageUtils.errorWithContext(context, msg: "同一时间内只能回答一个问题,请勿重复请求回答");
@@ -37,7 +39,8 @@ class TalkModel extends SafeChangeNotifier {
     notifyListeners();
 
     TemplateModel? templateModel = settingModel.templates.where((template) => template.chooseStatus).firstOrNull;
-    currentTalk = TalkHistory(talkQuestion: question,
+    currentTalk = TalkHistory(
+      talkQuestion: question,
       talkContent: "",
       talkDateTime: DateTime.now(),
       model: settingModel.runningModel?.model??"",
@@ -45,7 +48,8 @@ class TalkModel extends SafeChangeNotifier {
       templateContent: templateModel?.templateContent,
       modelOptions: (settingModel.modelSettingList??[]).where((model) => model.modelName == (settingModel.runningModel?.model??"")).firstOrNull?.options,
       titleExpanded: false,
-      continuousAnswerStatus: continuousAnswerStatus
+      continuousAnswerStatus: continuousAnswerStatus,
+      imageBase64: imageBase64Str
     );
     notifyListeners();
     List<Message> messageList = [];
@@ -174,6 +178,9 @@ class TalkHistory {
   //连续的作答状态
   bool continuousAnswerStatus = false;
 
+  //图片base64
+  String? imageBase64;
+
   TalkHistory({required this.talkQuestion,
     required this.talkContent,
     required this.talkDateTime,
@@ -184,6 +191,7 @@ class TalkHistory {
     this.modelOptions,
     this.titleExpanded = false,
     this.continuousAnswerStatus = false,
+    this.imageBase64,
   });
 
   //转换成消息
@@ -200,7 +208,13 @@ class TalkHistory {
       if((templateContent??"") != "" && templateContent!.contains("{{text}}")) {
         question = templateContent?.replaceAll("{{text}}", question)??"";
       }
-      Message userQuestionMessage = Message(role: MessageRole.user, content: question);
+      Message userQuestionMessage = Message(
+        role: MessageRole.user,
+        content: (imageBase64 == null || imageBase64!.isEmpty) ? question : talkQuestion,
+        images: (imageBase64 == null || imageBase64!.isEmpty) ? null : [
+          imageBase64!
+        ]
+      );
       messageList.add(userQuestionMessage);
     }
     //构建助手回复消息

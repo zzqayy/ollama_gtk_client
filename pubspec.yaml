@@ -18,6 +18,9 @@ dependencies:
   flutter_distributor: ^0.4.5
   flutter_markdown: ^0.7.4+1
   gtk: ^2.1.0
+  xdg_desktop_portal:
+    path: lib/src/xdg_desktop_portal.dart
+  easy_image_viewer: ^1.5.1
 
 dev_dependencies:
   flutter_test:

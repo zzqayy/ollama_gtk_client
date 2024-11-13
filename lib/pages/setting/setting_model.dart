@@ -280,20 +280,24 @@ class TemplateModel {
   //助手描述
   String assistantDesc;
 
-  //用户预处理内容
+  //对话预处理内容
   String templateContent;
 
   //选择状态
   bool chooseStatus;
 
-  TemplateModel({required this.templateName, required this.assistantDesc, required this.templateContent, this.chooseStatus = false});
+  TemplateModel({required this.templateName,
+    required this.assistantDesc,
+    required this.templateContent,
+    this.chooseStatus = false,
+  });
 
   factory TemplateModel.fromJson(Map<String, dynamic> json) {
     return TemplateModel(
       templateName: json['templateName'],
       assistantDesc: json['assistantDesc']??"",
       templateContent: json['templateContent'],
-      chooseStatus: json['chooseStatus'] is bool ? json['chooseStatus'] : false
+      chooseStatus: json['chooseStatus'] is bool ? json['chooseStatus'] : false,
     );
   }
 
@@ -302,7 +306,7 @@ class TemplateModel {
       "templateName": templateName,
       "assistantDesc": assistantDesc,
       "templateContent": templateContent,
-      "chooseStatus": chooseStatus
+      "chooseStatus": chooseStatus,
     };
   }
 
