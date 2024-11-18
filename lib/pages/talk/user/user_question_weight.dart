@@ -294,14 +294,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                         Expanded(
                           child: TextButton(
                               onPressed: () {
-                                showImageViewer(
-                                  context,
-                                  Image.file(_chooseFile!).image,
-                                  useSafeArea: true,
-                                  swipeDismissible: true,
-                                  doubleTapZoomable: true,
-                                  backgroundColor: Theme.of(context).colorScheme.primaryContainer
-                                );
+                                showCapture();
                               },
                               child: Text((_chooseFile?.path??"").length > 10 ? "${(_chooseFile?.path??"").substring((_chooseFile?.path??"").length - 10)}..." : (_chooseFile?.path??""),
                                 style: Theme.of(context).textTheme.bodySmall,
@@ -349,32 +342,37 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   //截图
   Future<void> screenshot2Base64({required BuildContext context}) async {
     await YaruWindow.of(context).hide();
-    Future.delayed(Duration(seconds: 1), () async {
-      var client = XdgDesktopPortalClient();
-      try{
-        var de = EnvUtils.getDEUpperCase();
-        String? screenshotUri;
-        if("KDE" == de) {
-          //kde直接调用spectacle
+    Future.delayed(Duration(milliseconds: 600), () async {
+      var de = EnvUtils.getDEUpperCase();
+      String? screenshotUri = null;
+      if("KDE" == de) {
+        //kde直接调用spectacle
+        try{
           screenshotUri = await ProcessUtils.captureKDEArea();
-        }else {
-          //除了kde其他截图都使用xdg截图接口
+        }catch(e) {
+          MessageUtils.errorWithContext(context, msg: "调用spectacle截图失败,请查看是否有该应用");
+        }
+      }else {
+        //除了kde其他截图都使用xdg截图接口
+        var client = XdgDesktopPortalClient();
+        try {
           final screenshot = await client.screenshot.screenshot(interactive: true);
           screenshotUri = screenshot.uri;
+        }catch(e) {
+          MessageUtils.errorWithContext(context, msg: "截图未完成");
+        }finally {
+          await client.close();
         }
-        if(screenshotUri.isNotEmpty) {
-          var fileUri = Uri.decodeFull(screenshotUri);
-          if(fileUri.startsWith('file://')) {
-            fileUri = fileUri.replaceFirst('file://', '');
-          }
-          setState(() {
-            _chooseFile = File(fileUri);
-          });
-        }
-      }catch(e) {
-        MessageUtils.errorWithContext(context, msg: "截图未完成");
       }
-      await client.close();
+      if(screenshotUri != null && screenshotUri.isNotEmpty) {
+        var fileUri = Uri.decodeFull(screenshotUri);
+        if(fileUri.startsWith('file://')) {
+          fileUri = fileUri.replaceFirst('file://', '');
+        }
+        setState(() {
+          _chooseFile = File(fileUri);
+        });
+      }
       await YaruWindow.of(context).show();
     });
 
@@ -416,6 +414,22 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
       MessageUtils.errorWithContext(context, msg: "文件选择未选中");
     }
     await client.close();
+  }
+
+  //显示图片
+  void showCapture() {
+    if(_chooseFile == null) {
+      MessageUtils.errorWithContext(context, msg: "没有文件需要查看");
+      return;
+    }
+    var client = XdgDesktopPortalClient();
+    try{
+      client.openUri.openFile(ResourceHandle.fromFile(_chooseFile!.openSync()), writable: false);
+    }catch(e) {
+      MessageUtils.errorWithContext(context, msg: "打开文件失败");
+    }finally {
+      client.close();
+    }
   }
 
 }

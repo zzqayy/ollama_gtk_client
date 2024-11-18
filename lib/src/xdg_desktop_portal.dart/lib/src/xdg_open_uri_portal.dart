@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dbus/dbus.dart';
 
 import 'xdg_portal_request.dart';
@@ -48,6 +50,36 @@ class XdgOpenUriPortal {
   }
 
   // FIXME: OpenFile
+  Future<void> openFile(ResourceHandle fd,
+      {String parentWindow = '',
+        bool? writable,
+        bool? ask,
+        String? activationToken}) async {
+    var request = XdgPortalRequest(_object, () async {
+      var options = <String, DBusValue>{};
+      options['handle_token'] = DBusString(_generateToken());
+      if (writable != null) {
+        options['writable'] = DBusBoolean(writable);
+      }
+      if (ask != null) {
+        options['ask'] = DBusBoolean(ask);
+      }
+      if (activationToken != null) {
+        options['activation_token'] = DBusString(activationToken);
+      }
+      var result = await _object.callMethod(
+          'org.freedesktop.portal.OpenURI',
+          'OpenFile',
+          [
+            DBusString(parentWindow),
+            DBusUnixFd(fd),
+            DBusDict.stringVariant(options)
+          ],
+          replySignature: DBusSignature('o'));
+      return result.returnValues[0].asObjectPath();
+    });
+    await request.stream.first;
+  }
 
   // FIXME: OpenDirectory
 }
