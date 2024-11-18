@@ -40,7 +40,7 @@ ollama_gtk_client -t=olive
 - [x] 指定模型
 - [x] 指定模板
 - [x] 调整对话时候的参数
-- [x] 对话中添加图片
+- [x] 对话中添加图片(添加图片时，助手的模板内容失效)
 
 ## Flutter Dependencies 说明
 

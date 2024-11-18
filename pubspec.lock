@@ -308,10 +308,10 @@ packages:
     dependency: transitive
     description:
       name: google_identity_services_web
-      sha256: "304e2a4c25d84c287df6d7ebf5b93d8bbd4ceb817d96c2686d44f6a346f227b6"
+      sha256: "55580f436822d64c8ff9a77e37d61f5fb1e6c7ec9d632a43ee324e2a05c3c6c9"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.3.1+5"
+    version: "0.3.3"
   googleapis:
     dependency: transitive
     description:

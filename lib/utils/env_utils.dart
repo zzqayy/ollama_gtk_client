@@ -8,5 +8,8 @@ class EnvUtils {
     return Platform.environment[key];
   }
 
-
+  static String? getDEUpperCase() {
+    return Platform.environment["XDG_CURRENT_DESKTOP"]?.toUpperCase();
+  }
+  
 }

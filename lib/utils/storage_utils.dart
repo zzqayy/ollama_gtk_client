@@ -46,4 +46,14 @@ class StorageUtils {
     return appDir;
   }
 
+  ///获取截图的临时目录
+  static Future<Directory> getTmpPictureDir() async {
+    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    Directory captureDir = Directory("$homeDirStr/.cache/$appDirName/Pictures/capture");
+    if(!captureDir.existsSync()) {
+      captureDir.createSync(recursive: true);
+    }
+    return captureDir;
+  }
+
 }

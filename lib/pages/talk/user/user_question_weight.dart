@@ -9,7 +9,9 @@ import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
 import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/xdg_desktop_portal.dart';
+import 'package:ollama_gtk_client/utils/env_utils.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
+import 'package:ollama_gtk_client/utils/process_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -350,9 +352,18 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     Future.delayed(Duration(seconds: 1), () async {
       var client = XdgDesktopPortalClient();
       try{
-        final screenshot = await client.screenshot.screenshot(interactive: true);
-        if(screenshot.uri.isNotEmpty) {
-          var fileUri = Uri.decodeFull(screenshot.uri);
+        var de = EnvUtils.getDEUpperCase();
+        String? screenshotUri;
+        if("KDE" == de) {
+          //kde直接调用spectacle
+          screenshotUri = await ProcessUtils.captureKDEArea();
+        }else {
+          //除了kde其他截图都使用xdg截图接口
+          final screenshot = await client.screenshot.screenshot(interactive: true);
+          screenshotUri = screenshot.uri;
+        }
+        if(screenshotUri.isNotEmpty) {
+          var fileUri = Uri.decodeFull(screenshotUri);
           if(fileUri.startsWith('file://')) {
             fileUri = fileUri.replaceFirst('file://', '');
           }
