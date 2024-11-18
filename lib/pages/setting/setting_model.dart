@@ -79,7 +79,15 @@ class SettingModel extends SafeChangeNotifier {
     var settingModel = await SettingUtils.getSettingProperties();
     this.client = settingModel.client;
     this.runningModel = settingModel.runningModel;
-    this.templates = settingModel.templates;
+    if( settingModel.templates.isEmpty) {
+      this.templates = [TemplateModel(templateName: "空模板", assistantDesc: '', templateContent: '', chooseStatus: true)];
+    }else {
+      int index = settingModel.templates.indexWhere((template) => template.templateName == "空模板");
+      if(index == -1) {
+        this.templates = [TemplateModel(templateName: "空模板", assistantDesc: '', templateContent: '')];
+      }
+      this.templates.addAll(settingModel.templates);
+    }
     //处理modelList
     refreshModelList(context);
     //处理状态
@@ -118,7 +126,9 @@ class SettingModel extends SafeChangeNotifier {
 
   //保存模板
   Future<void> saveTemplate(BuildContext context, {required TemplateModel value, int index = -1}) async {
-    if(index < 0) {
+    if(index == 0) {
+      MessageUtils.errorWithContext(context, msg: "空模板无法修改.删除");
+    } else if(index < 0) {
       var firstTemplate = templates.where((template) => template.templateName == value.templateName).firstOrNull;
       if(firstTemplate == null) {
         if(templates.isEmpty) {
@@ -196,7 +206,11 @@ class SettingModel extends SafeChangeNotifier {
   }
 
   //移除模板
-  Future<void> removeTemplate(int index) async {
+  Future<void> removeTemplate(BuildContext context, int index) async {
+    if(index == 0) {
+      MessageUtils.errorWithContext(context, msg: "空模板无法修改.删除");
+      return;
+    }
     templates.removeAt(index);
     await SettingUtils.saveModel(this);
     notifyListeners();

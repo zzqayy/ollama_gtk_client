@@ -168,7 +168,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                         YaruIconButton(
                           icon: Icon(YaruIcons.trash, color: YaruColors.of(context).warning,),
                           onPressed: () {
-                            settingModel.removeTemplate(index);
+                            settingModel.removeTemplate(context, index);
                           },
                         ) : YaruIconButton(
                         onPressed: () {
