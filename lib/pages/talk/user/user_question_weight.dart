@@ -1,9 +1,7 @@
 //获取用户提问框
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
-import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';

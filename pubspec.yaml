@@ -20,7 +20,6 @@ dependencies:
   gtk: ^2.1.0
   xdg_desktop_portal:
     path: lib/src/xdg_desktop_portal.dart
-  easy_image_viewer: ^1.5.1
 
 dev_dependencies:
   flutter_test:
