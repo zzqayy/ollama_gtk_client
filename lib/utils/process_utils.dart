@@ -24,4 +24,10 @@ class ProcessUtils {
     }
   }
 
+  //ocr识别
+  static Future<String> ocr() async {
+    //todo...
+    return '';
+  }
+
 }

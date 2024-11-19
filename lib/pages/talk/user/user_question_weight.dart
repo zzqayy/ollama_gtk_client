@@ -1,5 +1,6 @@
 //获取用户提问框
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -41,6 +42,8 @@ class UserQuestionWidget extends StatefulWidget {
   final bool continuousAnswerStatus;
   //切换连续回答状态
   final ValueChanged<bool>? onSwitchContinuous;
+  //切换ocr信息
+  final ValueChanged<bool>? onSwitchOcrStatus;
 
   const UserQuestionWidget({super.key,
     required this.onSubmit,
@@ -49,6 +52,7 @@ class UserQuestionWidget extends StatefulWidget {
     this.onStopClick,
     this.continuousAnswerStatus = false,
     this.onSwitchContinuous,
+    this.onSwitchOcrStatus,
   });
 
   @override
@@ -65,6 +69,8 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   bool hoverSubmitStatus = false;
 
   bool continuousAnswerStatus = false;
+
+  bool ocrStatus = false;
 
   //返回的对象
   late File? _chooseFile;
@@ -199,6 +205,18 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   ),
                   Expanded(child: Container()),
                   YaruCheckButton(
+                      value: ocrStatus,
+                      onChanged: (bool? status) {
+                        if(widget.onSwitchOcrStatus != null) {
+                          widget.onSwitchOcrStatus!((status??false));
+                        }
+                        setState(() {
+                          ocrStatus = (status??false);
+                        });
+                      },
+                      title: Text("OCR", style: Theme.of(context).textTheme.bodySmall,)
+                  ),
+                  YaruCheckButton(
                       value: continuousAnswerStatus,
                       onChanged: (bool? status) {
                         if(widget.onSwitchContinuous != null) {
@@ -272,65 +290,83 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             ),
             Padding(
               padding: const EdgeInsets.all(5),
-              child: Row(
-                children: [
-                  IconButton(
-                      onPressed: () async {
-                        await screenshot2Base64(context: context);
-                      },
-                      icon: Icon(YaruIcons.camera_photo)
-                  ),
-                  IconButton(
-                      onPressed: () async {
-                        await openImage(context: context);
-                      },
-                      icon: Icon(YaruIcons.folder_open)
-                  ),
-                  _chooseFile == null ? Container() : SizedBox(
-                    width: 200,
-                    height: 50,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                              onPressed: () {
-                                showCapture();
-                              },
-                              child: Text((_chooseFile?.path??"").length > 10 ? "${(_chooseFile?.path??"").substring((_chooseFile?.path??"").length - 10)}..." : (_chooseFile?.path??""),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              )
-                          ),
-                        ),
-                        IconButton(onPressed: (){
-                          setState(() {
-                            _chooseFile = null;
-                          });
-                        }, icon: Icon(YaruIcons.edit_clear))
-                      ],
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: 40,
+                child: Row(
+                  children: [
+                    IconButton(
+                        onPressed: () async {
+                          await screenshot2Base64(context: context);
+                        },
+                        icon: Icon(YaruIcons.camera_photo)
                     ),
-                  ),
-                  Expanded(
-                      child: Container()
-                  ),
-                  ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.bodySmall,
+                    IconButton(
+                        onPressed: () async {
+                          await openImage(context: context);
+                        },
+                        icon: Icon(YaruIcons.folder_open)
+                    ),
+                    _chooseFile == null ? Container() : SizedBox(
+                      width: 200,
+                      height: 40,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                                onPressed: () {
+                                  showCapture();
+                                },
+                                child: Text((_chooseFile?.path??"").length > 10 ? "${(_chooseFile?.path??"").substring((_chooseFile?.path??"").length - 10)}..." : (_chooseFile?.path??""),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                )
+                            ),
+                          ),
+                          IconButton(onPressed: (){
+                            setState(() {
+                              _chooseFile = null;
+                            });
+                          }, icon: Icon(YaruIcons.edit_clear))
+                        ],
                       ),
-                      icon: (true == widget.talkingStatus)
-                          ? const Icon(YaruIcons.light_bulb_on,)
-                          : const Icon(YaruIcons.send),
-                      onPressed: () {
-                        _submit();
-                      },
-                      onHover: (bool status) {
-                        setState(() {
-                          hoverSubmitStatus = status;
-                        });
-                      },
-                      label: Text((true == widget.talkingStatus)
-                          ? "回答中..."
-                          : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}")),
-                ],
+                    ),
+                    Expanded(
+                        child: Container()
+                    ),
+                    Padding(
+                        padding: EdgeInsets.only(right: 8),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        icon: const Icon(YaruIcons.document),
+                        onPressed: () {
+
+                        },
+                        label: const Text("手动OCR"),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        icon: (true == widget.talkingStatus)
+                            ? const Icon(YaruIcons.light_bulb_on,)
+                            : const Icon(YaruIcons.send),
+                        onPressed: () {
+                          _submit();
+                        },
+                        onHover: (bool status) {
+                          setState(() {
+                            hoverSubmitStatus = status;
+                          });
+                        },
+                        label: Text((true == widget.talkingStatus)
+                            ? "回答中..."
+                            : "发送${hoverSubmitStatus ? " (Ctrl+Enter)" : ""}"),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -430,6 +466,11 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     }finally {
       client.close();
     }
+  }
+
+  //ocr识别
+  void ocr() {
+
   }
 
 }
