@@ -54,7 +54,7 @@ class TalkInfoView extends StatelessWidget {
                             },
                           ),
                         ),
-                        (talkHistory.imageBase64 == null && talkHistory.imageBase64 == "") ? Container() : GestureDetector(
+                        (talkHistory.imageBase64 == null || talkHistory.imageBase64 == "") ? Container() : GestureDetector(
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.grey)
