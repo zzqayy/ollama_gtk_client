@@ -1,8 +1,12 @@
 //消息视图
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:ollama_gtk_client/components/base64_image_review.dart';
 import 'package:ollama_gtk_client/components/expend_text.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
+import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:yaru/yaru.dart';
 
 class TalkInfoView extends StatelessWidget {
@@ -36,18 +40,42 @@ class TalkInfoView extends StatelessWidget {
                   child: YaruInfoBadge(
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                     yaruInfoType: YaruInfoType.success,
-                    title: ExpandableText(talkHistory.talkQuestion,
-                      expanded: talkHistory.titleExpanded,
-                      switchExpanded: () {
-                        if(switchTitleExpanded != null) {
-                          switchTitleExpanded!();
-                        }
-                      },
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 5, bottom: 10),
+                          child: ExpandableText(talkHistory.talkQuestion,
+                            expanded: talkHistory.titleExpanded,
+                            switchExpanded: () {
+                              if(switchTitleExpanded != null) {
+                                switchTitleExpanded!();
+                              }
+                            },
+                          ),
+                        ),
+                        (talkHistory.imageBase64 == null && talkHistory.imageBase64 == "") ? Container() : GestureDetector(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey)
+                            ),
+                            width: 100,
+                            height: 100,
+                            child: Image.memory(Base64Decoder().convert(talkHistory.imageBase64!),
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          onTap: () {
+                            _openImage(context);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ))
           ],
         ),
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,6 +147,21 @@ class TalkInfoView extends StatelessWidget {
         ),
 
       ],
+    );
+  }
+
+  Future<void> _openImage(BuildContext context) async {
+    if(talkHistory.imageBase64 == null || talkHistory.imageBase64 == '') {
+      MessageUtils.error(msg: "图片为空");
+      return;
+    }
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Base64ImageReviewPage(
+              imageBase64: talkHistory.imageBase64!
+          );
+        },
     );
   }
 }
