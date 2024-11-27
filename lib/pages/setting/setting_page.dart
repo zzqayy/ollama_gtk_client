@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
@@ -61,6 +62,9 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   ///初始化插件
   Future<void> _initPlugins() async {
     _ocrPluginsExist = await RapidOCRUtils.checkOcrPluginsExists();
+    if(kDebugMode) {
+      print("plugin exists is $_ocrPluginsExist");
+    }
     setState(() {});
   }
 
@@ -264,8 +268,12 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
       child: Column(
         children: [
           ListTile(
-            title: Text("插件地址"),
-            subtitle: SelectableText(_ocrPluginsExist ? "存在": "不存在(.config/ollama_gtk_client/plugins/RapidOcrOnnx/lib)"),
+            title: Text("插件"),
+            subtitle: Text(_ocrPluginsExist ? "存在": "不存在",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: _ocrPluginsExist ? YaruColors.of(context).success : YaruColors.of(context).error
+              ),
+            ),
             trailing: YaruIconButton(
               icon: Icon(YaruIcons.sync),
               onPressed: () {

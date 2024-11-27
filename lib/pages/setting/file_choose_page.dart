@@ -44,7 +44,7 @@ class _FileChoosePageState extends State<FileChoosePage> {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(widget.title),
-      subtitle: Text(_chooseFile?.path??""),
+      subtitle: SelectableText((_chooseFile?.path??"").length > 60 ? "...${(_chooseFile?.path??"").substring((_chooseFile?.path??"").length - 60)}" : (_chooseFile?.path??"")),
       onTap: () async {
         await openImage(context: context);
         if(widget.onChoose != null) {

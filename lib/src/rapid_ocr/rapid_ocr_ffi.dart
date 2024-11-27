@@ -53,9 +53,7 @@ class RapidOCRUtils {
 
   ///检查ocr插件是否存在
   static Future<bool> checkOcrPluginsExists({String? pluginsPath}) async {
-    if(pluginsPath != null) {
-      pluginsPath = await getOcrPluginsPath();
-    }
+    pluginsPath ??= await getOcrPluginsPath();
     File pluginsFile = File(pluginsPath??"");
     return pluginsFile.existsSync();
   }
