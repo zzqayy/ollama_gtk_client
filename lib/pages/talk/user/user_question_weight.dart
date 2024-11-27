@@ -534,7 +534,59 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     }finally {
       showLoadingFunc.call();
     }
-
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          width: 300,
+          height: 200,
+          child: SimpleDialog(
+            titlePadding: EdgeInsets.zero,
+            title: YaruDialogTitleBar(
+              title: Text("OCR提示"),
+            ),
+            children: [
+              Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text("是否清除图片?(清除后图片会被删除)"),
+                  )
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    Expanded(child: Container()),
+                    OutlinedButton(
+                      child: Text("清除"),
+                      onPressed: () {
+                        if(_chooseFile != null && _chooseFile!.existsSync()) {
+                          _chooseFile?.deleteSync();
+                          setState(() {
+                            _chooseFile = null;
+                          });
+                        }
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    SizedBox(
+                      width: 10,
+                      child: Container(),
+                    ),
+                    OutlinedButton(
+                      child: Text("关闭"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
 }

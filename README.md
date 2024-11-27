@@ -41,6 +41,7 @@ ollama_gtk_client -t=olive
 - [x] 指定模板
 - [x] 调整对话时候的参数
 - [x] 对话中添加图片(添加图片时，助手的模板内容失效)
+- [x] 添加截图ocr支持(调用rapidocr的RapidOcrOnnx(https://github.com/RapidAI/RapidOcrOnnx)实现)
 
 ## Flutter Dependencies 说明
 
@@ -55,6 +56,7 @@ ollama_gtk_client -t=olive
 | gtk | Canonical出品的GTK工具集合      |
 | yaru | Canonical出品的Ubuntu风味外观   |
 | safe_change_notifier | Canonical下的安全的provider管理 |
+| ffi | 跨平台调用c++ |
 
 
 ## 打包
@@ -82,3 +84,12 @@ flutter_distributor package --platform linux --targets deb
 ### 设置图
 
 ![设置图](./doc/images/settings.png)
+
+## 特别感谢:
+
+1. [Canonical](https://canonical.com)
+2. [RapidOcrOnnx](https://github.com/RapidAI/RapidOcrOnnx)
+3. [RapidOCR](https://github.com/RapidAI/RapidOCR)
+
+## 版权
+项目使用Apache2.0证书,如有侵权部分请联系作者删除

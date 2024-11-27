@@ -38,7 +38,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
       icon: Icon(YaruIcons.task_list),
     ),
     YaruTab(
-      label: 'OCR配置',
+      label: 'OCR',
       icon: Icon(YaruIcons.document),
     ),
   ];
