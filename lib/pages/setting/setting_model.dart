@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
+import 'package:ollama_gtk_client/src/rapid_ocr/model.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:ollama_gtk_client/utils/setting_utils.dart';
 import 'package:safe_change_notifier/safe_change_notifier.dart';
@@ -27,7 +28,10 @@ class SettingModel extends SafeChangeNotifier {
   //模板列表
   List<TemplateModel> templates = [];
 
-  SettingModel({this.runningModel, this.client, required this.templates, this.closeHideStatus = false, this.modelSettingList});
+  //ocr设置
+  OCRModel? ocrModel;
+
+  SettingModel({this.runningModel, this.client, required this.templates, this.closeHideStatus = false, this.modelSettingList, this.ocrModel});
 
   static SettingModel fromJson(Map<String, dynamic> json) {
     dynamic templatesJsonStr = json['templates'];
@@ -53,12 +57,21 @@ class SettingModel extends SafeChangeNotifier {
       var list = List.from(modelSettingListJson);
       modelSettingList = list.map((e) => AIModelSettingModel.fromJson(e)).toList();
     }
+    dynamic ocrModelJsonStr = json['ocrModel'];
+    late OCRModel _ocrModel;
+    if(ocrModelJsonStr == null) {
+      _ocrModel = OCRModel(detPath: "", clsPath: "", recPath: "", szKeyPath: "");
+    }else {
+      var ocrModelJson = jsonDecode(ocrModelJsonStr);
+      _ocrModel = OCRModel.fromJson(ocrModelJson);
+    }
     return SettingModel(
         closeHideStatus: closeHideStatus,
         runningModel: Model(model: json['runningModel'] == "" ? null : json['runningModel']),
         client: OllamaClient(baseUrl: json['ollamaBaseUrl'] == "" ? null : json['ollamaBaseUrl']),
         templates: templates,
-        modelSettingList: modelSettingList
+        modelSettingList: modelSettingList,
+        ocrModel: _ocrModel
     );
   }
 
@@ -70,7 +83,8 @@ class SettingModel extends SafeChangeNotifier {
       "runningModel": runningModel?.model??"",
       "ollamaBaseUrl": client?.baseUrl??"",
       "templates": json.encode(templateJson),
-      "modelSettingList": json.encode(modelSettingListJson)
+      "modelSettingList": json.encode(modelSettingListJson),
+      "ocrModel": json.encode(ocrModel??OCRModel(detPath: "", clsPath: "", recPath: "", szKeyPath: ""))
     };
   }
 
@@ -88,6 +102,7 @@ class SettingModel extends SafeChangeNotifier {
       }
       this.templates.addAll(settingModel.templates);
     }
+    this.ocrModel = settingModel.ocrModel;
     //处理modelList
     refreshModelList(context);
     //处理状态
@@ -281,6 +296,13 @@ class SettingModel extends SafeChangeNotifier {
         );
       },
     );
+  }
+
+  //改变ocrModel
+  Future<void> changeOcrModel(BuildContext context, {String? detPath,  String? clsPath, String? recPath, String? szKeyPath}) async {
+    ocrModel = OCRModel(detPath: detPath??"", clsPath: clsPath??"", recPath: recPath??"", szKeyPath: szKeyPath??"");
+    await SettingUtils.saveModel(this);
+    notifyListeners();
   }
 
 }

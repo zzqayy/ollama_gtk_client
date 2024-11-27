@@ -24,10 +24,15 @@ class ProcessUtils {
     }
   }
 
-  //ocr识别
-  static Future<String> ocr() async {
-    //todo...
-    return '';
+  //获取cpu线程数
+  static int? getProcessNum() {
+    try {
+      ProcessResult result = Process.runSync('/bin/sh', [ "-c", "grep ^processor /proc/cpuinfo | wc -l"]);
+      return int.parse(result.stdout);
+    }catch(e) {
+      print("获取线程数失败,错误是: ${e.toString()}");
+    }
+    return null;
   }
 
 }

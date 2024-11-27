@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
+import 'package:ollama_gtk_client/pages/setting/file_choose_page.dart';
 import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
@@ -23,10 +24,29 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
 
   bool _templateDelStatus = false;
 
+  static const List<YaruTab> _tabList = const [
+    YaruTab(
+      label: '基础',
+      icon: Icon(YaruIcons.application),
+    ),
+    YaruTab(
+      label: '服务',
+      icon: Icon(YaruIcons.cloud),
+    ),
+    YaruTab(
+      label: '模板',
+      icon: Icon(YaruIcons.task_list),
+    ),
+    YaruTab(
+      label: 'OCR配置',
+      icon: Icon(YaruIcons.document),
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabList.length, vsync: this);
   }
 
 
@@ -50,20 +70,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
             width: 500,
             child: YaruTabBar(
               tabController: _tabController,
-              tabs: const [
-                YaruTab(
-                  label: '基础',
-                  icon: Icon(YaruIcons.application),
-                ),
-                YaruTab(
-                  label: '服务',
-                  icon: Icon(YaruIcons.cloud),
-                ),
-                YaruTab(
-                  label: '模板',
-                  icon: Icon(YaruIcons.task_list),
-                ),
-              ],
+              tabs: _tabList,
             ),
           ),
         ),
@@ -77,6 +84,7 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
                 _baseSettingWidget(settingModel),
                 _cloudSettingWidget(settingModel),
                 _templateSettingWidget(settingModel),
+                _ocrSettingWidget(settingModel),
               ],
             ),
           ),
@@ -234,6 +242,71 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
           onTap: () => settingModel.showModelSettingDialog(context),
         ),
       ],
+    );
+  }
+
+  Widget _ocrSettingWidget(SettingModel settingModel) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          FileChoosePage(
+            title: '检测模型(det)',
+            initPath: settingModel.ocrModel?.detPath,
+            onChoose: (String? filePath) {
+              if(filePath != null) {
+                settingModel.changeOcrModel(context,
+                  detPath: filePath,
+                  clsPath: settingModel.ocrModel?.clsPath,
+                  recPath: settingModel.ocrModel?.recPath,
+                  szKeyPath: settingModel.ocrModel?.szKeyPath,
+                );
+              }
+            },
+          ),
+          FileChoosePage(
+            title: '方向分类器(cls)',
+            initPath: settingModel.ocrModel?.clsPath,
+            onChoose: (String? filePath) {
+              if(filePath != null) {
+                settingModel.changeOcrModel(context,
+                  detPath: settingModel.ocrModel?.detPath,
+                  clsPath: filePath,
+                  recPath: settingModel.ocrModel?.recPath,
+                  szKeyPath: settingModel.ocrModel?.szKeyPath,
+                );
+              }
+            },
+          ),
+          FileChoosePage(
+            title: '识别模型(rec)',
+            initPath: settingModel.ocrModel?.recPath,
+            onChoose: (String? filePath) {
+              if(filePath != null) {
+                settingModel.changeOcrModel(context,
+                  detPath: settingModel.ocrModel?.detPath,
+                  clsPath: settingModel.ocrModel?.clsPath,
+                  recPath: filePath,
+                  szKeyPath: settingModel.ocrModel?.szKeyPath,
+                );
+              }
+            },
+          ),
+          FileChoosePage(
+            title: 'key路径',
+            initPath: settingModel.ocrModel?.szKeyPath,
+            onChoose: (String? filePath) {
+              if(filePath != null) {
+                settingModel.changeOcrModel(context,
+                  detPath: settingModel.ocrModel?.detPath,
+                  clsPath: settingModel.ocrModel?.clsPath,
+                  recPath: settingModel.ocrModel?.recPath,
+                  szKeyPath: filePath,
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

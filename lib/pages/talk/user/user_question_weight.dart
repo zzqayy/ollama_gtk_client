@@ -2,11 +2,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
+import 'package:ollama_gtk_client/main.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
+import 'package:ollama_gtk_client/src/rapid_ocr/rapid_ocr_ffi.dart';
 import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/xdg_desktop_portal.dart';
 import 'package:ollama_gtk_client/utils/env_utils.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
@@ -295,13 +298,19 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                   children: [
                     IconButton(
                         onPressed: () async {
-                          await screenshot2Base64(context: context);
+                          await screenshot2Base64(
+                            context: context,
+                            settingModel: settingModel,
+                          );
                         },
                         icon: Icon(YaruIcons.camera_photo)
                     ),
                     IconButton(
                         onPressed: () async {
-                          await openImage(context: context);
+                          await openImage(
+                            context: context,
+                            settingModel: settingModel,
+                          );
                         },
                         icon: Icon(YaruIcons.folder_open)
                     ),
@@ -339,7 +348,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                         ),
                         icon: const Icon(YaruIcons.document),
                         onPressed: () {
-
+                          ocr(settingModel);
                         },
                         label: const Text("手动OCR"),
                       ),
@@ -374,7 +383,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   }
 
   //截图
-  Future<void> screenshot2Base64({required BuildContext context}) async {
+  Future<void> screenshot2Base64({required BuildContext context, required SettingModel settingModel}) async {
     await YaruWindow.of(context).hide();
     Future.delayed(Duration(milliseconds: 600), () async {
       var de = EnvUtils.getDEUpperCase();
@@ -406,6 +415,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
         setState(() {
           _chooseFile = File(fileUri);
         });
+        if(ocrStatus) {
+          ocr(settingModel);
+        }
       }
       await YaruWindow.of(context).show();
     });
@@ -413,7 +425,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   }
 
   //选择文件
-  Future<void> openImage({required BuildContext context}) async {
+  Future<void> openImage({required BuildContext context, required SettingModel settingModel}) async {
     var client = XdgDesktopPortalClient();
     try{
       var result = client.fileChooser.openFile(
@@ -421,6 +433,15 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
           multiple: false,
           directory: false,
           filters: [
+            XdgFileChooserFilter('All Image', [
+              XdgFileChooserGlobPattern('*.jpg'),
+              XdgFileChooserGlobPattern('*.jpeg'),
+              XdgFileChooserMimeTypePattern('image/jpeg'),
+              XdgFileChooserGlobPattern('*.png'),
+              XdgFileChooserMimeTypePattern('image/png'),
+              XdgFileChooserGlobPattern('*.svg'),
+              XdgFileChooserMimeTypePattern('application/x-svg'),
+            ]),
             XdgFileChooserFilter('JPG Image', [
               XdgFileChooserGlobPattern('*.jpg'),
               XdgFileChooserGlobPattern('*.jpeg'),
@@ -444,6 +465,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
       setState(() {
         _chooseFile = File(fileUri);
       });
+      if(ocrStatus) {
+        ocr(settingModel);
+      }
     }catch(e) {
       MessageUtils.errorWithContext(context, msg: "文件选择未选中");
     }
@@ -467,7 +491,49 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   }
 
   //ocr识别
-  void ocr() {
+  void ocr(SettingModel settingModel) {
+    var showLoadingFunc = BotToast.showLoading();
+    try {
+      if(_chooseFile == null || !_chooseFile!.existsSync()) {
+        MessageUtils.error(msg: "识别的文件不存在");
+        return;
+      }
+      var ocrModel = settingModel.ocrModel;
+      if(ocrModel == null) {
+        MessageUtils.error(msg: "ocr没有配置");
+        return;
+      }
+      File detFile = File(ocrModel.detPath);
+      if(!detFile.existsSync()) {
+        MessageUtils.error(msg: "检测模型(det)模型不存在");
+        return;
+      }
+      File clsFile = File(ocrModel.clsPath);
+      if(!clsFile.existsSync()) {
+        MessageUtils.error(msg: "方向分类器(cls)不存在");
+        return;
+      }
+      File recFile = File(ocrModel.recPath);
+      if(!recFile.existsSync()) {
+        MessageUtils.error(msg: "识别模型(rec)不存在");
+        return;
+      }
+      File szKeyFile = File(ocrModel.szKeyPath);
+      if(!szKeyFile.existsSync()) {
+        MessageUtils.error(msg: "key路径不存在");
+        return;
+      }
+      //开始ocr
+      String? ocrStr = RapidOCRUtils.ocr(ocrModel: ocrModel, imagePath: _chooseFile!.path, processNum: cpuProcessNum??4);
+      if(ocrStr != null) {
+        _questionTextEditingController.text += ocrStr;
+      }
+    }catch(e) {
+      MessageUtils.error(msg: e.toString());
+      return;
+    }finally {
+      showLoadingFunc.call();
+    }
 
   }
 
