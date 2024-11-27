@@ -348,7 +348,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                         ),
                         icon: const Icon(YaruIcons.document),
                         onPressed: () {
-                          ocr(settingModel);
+                          ocr(context, settingModel);
                         },
                         label: const Text("手动OCR"),
                       ),
@@ -416,7 +416,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
           _chooseFile = File(fileUri);
         });
         if(ocrStatus) {
-          ocr(settingModel);
+          ocr(context, settingModel);
         }
       }
       await YaruWindow.of(context).show();
@@ -466,7 +466,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
         _chooseFile = File(fileUri);
       });
       if(ocrStatus) {
-        ocr(settingModel);
+        ocr(context, settingModel);
       }
     }catch(e) {
       MessageUtils.errorWithContext(context, msg: "文件选择未选中");
@@ -491,8 +491,9 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   }
 
   //ocr识别
-  Future<void> ocr(SettingModel settingModel) async {
+  Future<void> ocr(BuildContext context, SettingModel settingModel) async {
     var showLoadingFunc = BotToast.showLoading();
+    bool _showTip = false;
     try {
       if(_chooseFile == null || !_chooseFile!.existsSync()) {
         MessageUtils.error(msg: "识别的文件不存在");
@@ -526,6 +527,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
       //开始ocr
       String? ocrStr = await RapidOCRUtils.ocr(ocrModel: ocrModel, imagePath: _chooseFile!.path, processNum: cpuProcessNum??4);
       if(ocrStr != null) {
+        _showTip = true;
         _questionTextEditingController.text += ocrStr;
       }
     }catch(e) {
@@ -534,59 +536,62 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     }finally {
       showLoadingFunc.call();
     }
-    showDialog(
-      context: context,
-      builder: (context) {
-        return SizedBox(
-          width: 300,
-          height: 200,
-          child: SimpleDialog(
+    if(_showTip) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
             titlePadding: EdgeInsets.zero,
             title: YaruDialogTitleBar(
               title: Text("OCR提示"),
             ),
             children: [
-              Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text("是否清除图片?(清除后图片会被删除)"),
-                  )
-              ),
               Padding(
-                padding: EdgeInsets.all(10),
-                child: Row(
-                  children: [
-                    Expanded(child: Container()),
-                    OutlinedButton(
-                      child: Text("清除"),
-                      onPressed: () {
-                        if(_chooseFile != null && _chooseFile!.existsSync()) {
-                          _chooseFile?.deleteSync();
-                          setState(() {
-                            _chooseFile = null;
-                          });
-                        }
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    SizedBox(
-                      width: 10,
-                      child: Container(),
-                    ),
-                    OutlinedButton(
-                      child: Text("关闭"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
+                padding: EdgeInsets.all(8),
+                child:  SizedBox(
+                  width: 260,
+                  height: 150,
+                  child: Column(
+                    children: [
+                      Expanded(
+                          child: Text("是否清除图片?")
+                      ),
+                      Row(
+                        children: [
+                          Expanded(child: Container()),
+                          OutlinedButton(
+                            child: Text("清除"),
+                            onPressed: () {
+                              if(_chooseFile != null && _chooseFile!.existsSync()) {
+                                _chooseFile?.deleteSync();
+                                setState(() {
+                                  _chooseFile = null;
+                                });
+                              }
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          SizedBox(
+                            width: 10,
+                            child: Container(),
+                          ),
+                          OutlinedButton(
+                            child: Text("关闭"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              )
             ],
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 
 }
