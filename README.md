@@ -3,6 +3,26 @@
 a flutter app build with ubuntu style
 
 ## 使用参数说明
+
+### OCR说明
+OCR使用时,需要首先将插件文件 libRapidOcrOnnx.so 下载到 $HOME/.config/ollama_gtk_client/plugins/RapidOcrOnnx/lib/ 目录下,然后再将模型下载,在设置中指定每个模型
+推荐目录结构
+```
+$HOME/.config/ollama_gtk_client/plugins/RapidOcrOnnx
+
+├── lib
+│   └── libRapidOcrOnnx.so
+└── model
+    ├── cls
+    │   └── ch_ppocr_mobile_v2.0_cls_train.onnx
+    ├── det
+    │   └── ch_PP-OCRv4_det_infer.onnx
+    ├── ppocr_keys_v1.txt
+    └── rec
+        └── ch_PP-OCRv4_rec_infer.onnx
+```
+
+### 命令行说明
 启动时支持简单的主题配置,比如:
 ```shell
 ollama_gtk_client --theme=olive
