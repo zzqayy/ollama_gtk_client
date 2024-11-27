@@ -59,7 +59,7 @@ class StorageUtils {
   ///获取截图的插件目录
   static Future<Directory> getPluginsDir() async {
     String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
-    Directory captureDir = Directory("$homeDirStr/.cache/$appDirName/plugins");
+    Directory captureDir = Directory("$homeDirStr/.config/$appDirName/plugins");
     if(!captureDir.existsSync()) {
       captureDir.createSync(recursive: true);
     }

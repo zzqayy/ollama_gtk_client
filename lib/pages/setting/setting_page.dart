@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
@@ -5,6 +7,10 @@ import 'package:ollama_gtk_client/pages/setting/file_choose_page.dart';
 import 'package:ollama_gtk_client/pages/setting/model_setting_page.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
+import 'package:ollama_gtk_client/src/rapid_ocr/rapid_ocr_ffi.dart';
+import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/src/xdg_desktop_portal_client.dart';
+import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/src/xdg_file_chooser_portal.dart';
+import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -23,6 +29,8 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   late TabController _tabController;
 
   bool _templateDelStatus = false;
+
+  bool _ocrPluginsExist = false;
 
   static const List<YaruTab> _tabList = const [
     YaruTab(
@@ -47,8 +55,14 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabList.length, vsync: this);
+    _initPlugins();
   }
 
+  ///初始化插件
+  Future<void> _initPlugins() async {
+    _ocrPluginsExist = await RapidOCRUtils.checkOcrPluginsExists();
+    setState(() {});
+  }
 
   @override
   void dispose() {
@@ -249,6 +263,16 @@ class _SettingPageState extends State<SettingPage> with TickerProviderStateMixin
     return SingleChildScrollView(
       child: Column(
         children: [
+          ListTile(
+            title: Text("插件地址"),
+            subtitle: SelectableText(_ocrPluginsExist ? "存在": "不存在(.config/ollama_gtk_client/plugins/RapidOcrOnnx/lib)"),
+            trailing: YaruIconButton(
+              icon: Icon(YaruIcons.sync),
+              onPressed: () {
+                _initPlugins();
+              },
+            ),
+          ),
           FileChoosePage(
             title: '检测模型(det)',
             initPath: settingModel.ocrModel?.detPath,

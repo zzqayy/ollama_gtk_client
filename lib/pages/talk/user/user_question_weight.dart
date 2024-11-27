@@ -491,7 +491,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   }
 
   //ocr识别
-  void ocr(SettingModel settingModel) {
+  Future<void> ocr(SettingModel settingModel) async {
     var showLoadingFunc = BotToast.showLoading();
     try {
       if(_chooseFile == null || !_chooseFile!.existsSync()) {
@@ -524,7 +524,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
         return;
       }
       //开始ocr
-      String? ocrStr = RapidOCRUtils.ocr(ocrModel: ocrModel, imagePath: _chooseFile!.path, processNum: cpuProcessNum??4);
+      String? ocrStr = await RapidOCRUtils.ocr(ocrModel: ocrModel, imagePath: _chooseFile!.path, processNum: cpuProcessNum??4);
       if(ocrStr != null) {
         _questionTextEditingController.text += ocrStr;
       }

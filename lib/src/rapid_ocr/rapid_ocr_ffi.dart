@@ -1,8 +1,10 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:ollama_gtk_client/src/rapid_ocr/model.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
+import 'package:ollama_gtk_client/utils/storage_utils.dart';
 
 //rapidOCR模型
 final class RapidOCRModel extends Struct {
@@ -31,10 +33,42 @@ typedef RapidOCRDart = Pointer<Utf8> Function(RapidOCRModel ocrModel, int nThrea
 //ocr工具
 class RapidOCRUtils {
 
+  static const String LIB_SO_PATH = "libRapidOcrOnnx.so";
+
+  ///获取ocr插件目录地址
+  static Future<String> getOcrPluginsDirPath() async {
+    var pluginsDir = await StorageUtils.getPluginsDir();
+    Directory directory = Directory("${pluginsDir.path}/RapidOcrOnnx/lib");
+    if(!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+    return directory.path;
+  }
+
+  ///获取ocr插件文件地址
+  static Future<String> getOcrPluginsPath() async {
+    String dirPath = await getOcrPluginsDirPath();
+    return "$dirPath/$LIB_SO_PATH";
+  }
+
+  ///检查ocr插件是否存在
+  static Future<bool> checkOcrPluginsExists({String? pluginsPath}) async {
+    if(pluginsPath != null) {
+      pluginsPath = await getOcrPluginsPath();
+    }
+    File pluginsFile = File(pluginsPath??"");
+    return pluginsFile.existsSync();
+  }
+
   //识别图片
-  static String? ocr({required OCRModel ocrModel, required String imagePath, int processNum = 4}) {
+  static Future<String?> ocr({required OCRModel ocrModel, required String imagePath, int processNum = 4}) async {
     try{
-      final dylib = DynamicLibrary.open("assets/linux/libRapidOcrOnnx.so");
+      String pluginsPath = await getOcrPluginsPath();
+      if(await checkOcrPluginsExists(pluginsPath: pluginsPath)) {
+        MessageUtils.error(msg: "未找到插件地址");
+        return null;
+      }
+      final dylib = DynamicLibrary.open(pluginsPath);
       //创建对象
       final rapidOCRModelDart = dylib.lookupFunction<CreateOCRModelNative, CreateOCRModelDart>("create_ocr_model");
       final rapidOCRModel = rapidOCRModelDart(
