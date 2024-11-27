@@ -62,7 +62,7 @@ class RapidOCRUtils {
   static Future<String?> ocr({required OCRModel ocrModel, required String imagePath, int processNum = 4}) async {
     try{
       String pluginsPath = await getOcrPluginsPath();
-      if(await checkOcrPluginsExists(pluginsPath: pluginsPath)) {
+      if(!(await checkOcrPluginsExists(pluginsPath: pluginsPath))) {
         MessageUtils.error(msg: "未找到插件地址");
         return null;
       }
