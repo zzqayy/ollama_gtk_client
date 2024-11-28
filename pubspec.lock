@@ -553,7 +553,7 @@ packages:
     source: hosted
     version: "3.1.6"
   platform_linux:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: platform_linux
       sha256: "856cfc9871e3ff3df6926991729d24bba9b70d0229ae377fa08b562344baaaa8"

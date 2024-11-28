@@ -14,6 +14,7 @@ import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/xdg_desktop_po
 import 'package:ollama_gtk_client/utils/env_utils.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:ollama_gtk_client/utils/process_utils.dart';
+import 'package:platform_linux/platform.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
 
@@ -386,25 +387,27 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   Future<void> screenshot2Base64({required BuildContext context, required SettingModel settingModel}) async {
     await YaruWindow.of(context).hide();
     Future.delayed(Duration(milliseconds: 600), () async {
-      var de = EnvUtils.getDEUpperCase();
       String? screenshotUri = null;
-      if("KDE" == de) {
-        //kde直接调用spectacle
-        try{
-          screenshotUri = await ProcessUtils.captureKDEArea();
-        }catch(e) {
-          MessageUtils.errorWithContext(context, msg: "调用spectacle截图失败,请查看是否有该应用");
-        }
-      }else {
-        //除了kde其他截图都使用xdg截图接口
-        var client = XdgDesktopPortalClient();
-        try {
-          final screenshot = await client.screenshot.screenshot(interactive: true);
-          screenshotUri = screenshot.uri;
-        }catch(e) {
-          MessageUtils.errorWithContext(context, msg: "截图未完成");
-        }finally {
-          await client.close();
+      if(platform.isLinux) {
+        if(platform.isKDE) {
+          try{
+            screenshotUri = await ProcessUtils.captureKDEArea();
+          }catch(e) {
+            MessageUtils.errorWithContext(context, msg: "调用spectacle截图失败,请查看是否有该应用");
+            return;
+          }
+        }else {
+          //除了kde其他截图都使用xdg截图接口
+          var client = XdgDesktopPortalClient();
+          try {
+            final screenshot = await client.screenshot.screenshot(interactive: true);
+            screenshotUri = screenshot.uri;
+          }catch(e) {
+            MessageUtils.errorWithContext(context, msg: "截图未完成");
+            return;
+          }finally {
+            await client.close();
+          }
         }
       }
       if(screenshotUri != null && screenshotUri.isNotEmpty) {

@@ -5,8 +5,10 @@ import 'package:flutter/semantics.dart';
 import 'package:ollama_gtk_client/home.dart';
 import 'package:ollama_gtk_client/theme.dart';
 import 'package:ollama_gtk_client/utils/process_utils.dart';
+import 'package:platform_linux/platform.dart';
 import 'package:yaru/yaru.dart';
 
+final platform = LocalPlatform();
 int? cpuProcessNum = ProcessUtils.getProcessNum();
 Future<void> main() async {
   await YaruWindowTitleBar.ensureInitialized();
