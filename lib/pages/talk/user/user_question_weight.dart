@@ -413,6 +413,8 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
           }catch(e) {
             MessageUtils.errorWithContext(context, msg: "调用spectacle截图失败,请查看是否有该应用");
             return;
+          }finally {
+            await YaruWindow.of(context).show();
           }
         }else {
           //除了kde其他截图都使用xdg截图接口
@@ -425,6 +427,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
             return;
           }finally {
             await client.close();
+            await YaruWindow.of(context).show();
           }
         }
       }
@@ -440,7 +443,7 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
           ocr(context, settingModel);
         }
       }
-      await YaruWindow.of(context).show();
+
     });
 
   }
