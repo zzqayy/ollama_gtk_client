@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ollama_gtk_client/gtk_model.dart';
 import 'package:ollama_gtk_client/home_model.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/talk/talk_model.dart';
@@ -31,6 +32,7 @@ class _TalkPageState extends State<TalkPage> {
     final homeModel = context.watch<HomeModel>();
     final talkModel = context.watch<TalkModel>();
     final settingModel = context.watch<SettingModel>();
+    final gtkCommandLineModel = context.watch<GtkCommandLineModel>();
     return YaruDetailPage(
       body: Padding(
         padding: const EdgeInsets.all(5),
@@ -94,6 +96,8 @@ class _TalkPageState extends State<TalkPage> {
                       homeModel: homeModel
                   );
                 },
+                initOcrStatus: gtkCommandLineModel.ocrStatus,
+                initScreenshotStatus: gtkCommandLineModel.screenshotStatus,
               ),
             ),
           ],

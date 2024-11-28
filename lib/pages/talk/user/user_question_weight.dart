@@ -6,6 +6,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ollama_gtk_client/components/my_yaru_split_button.dart';
+import 'package:ollama_gtk_client/gtk_model.dart';
 import 'package:ollama_gtk_client/main.dart';
 import 'package:ollama_gtk_client/pages/setting/setting_model.dart';
 import 'package:ollama_gtk_client/pages/setting/template_setting_page.dart';
@@ -31,20 +32,25 @@ class UserQuestionModel {
 
 }
 
+///用户输入框
 class UserQuestionWidget extends StatefulWidget {
-  //提交内容
+  ///提交内容
   final ValueChanged<UserQuestionModel> onSubmit;
-  //聊天状态
+  ///聊天状态
   final bool talkingStatus;
-  //清除按钮
+  ///初始的ocr状态
+  final bool initOcrStatus;
+  ///初始的截图状态
+  final bool initScreenshotStatus;
+  ///清除按钮
   final VoidCallback? onClearClick;
-  //停止按钮
+  ///停止按钮
   final VoidCallback? onStopClick;
-  //连续回答状态
+  ///连续回答状态
   final bool continuousAnswerStatus;
-  //切换连续回答状态
+  ///切换连续回答状态
   final ValueChanged<bool>? onSwitchContinuous;
-  //切换ocr信息
+  ///切换ocr信息
   final ValueChanged<bool>? onSwitchOcrStatus;
 
   const UserQuestionWidget({super.key,
@@ -55,6 +61,8 @@ class UserQuestionWidget extends StatefulWidget {
     this.continuousAnswerStatus = false,
     this.onSwitchContinuous,
     this.onSwitchOcrStatus,
+    this.initOcrStatus = false,
+    this.initScreenshotStatus = false,
   });
 
   @override
@@ -82,6 +90,16 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
     super.initState();
     continuousAnswerStatus = widget.continuousAnswerStatus;
     _chooseFile = null;
+    ocrStatus = widget.initOcrStatus;
+    setState(() {});
+    final settingModel = context.read<SettingModel>();
+    if(widget.initScreenshotStatus) {
+      screenshot2Base64(
+        context: context,
+        settingModel: settingModel,
+      );
+    }
+
   }
 
   @override
