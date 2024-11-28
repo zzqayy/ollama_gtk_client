@@ -23,13 +23,17 @@ $HOME/.config/ollama_gtk_client/plugins/RapidOcrOnnx
 ```
 
 ### 命令行说明
-启动时支持简单的主题配置,比如:
+#### 命令行参数(**暂不支持空格携带参数,必须使用=号**):
+1. 主题配置(--theme=,或者-t=)
+2. 默认开启ocr状态(--ocr,-o)
+3. 启动时截图(--screenshot,-s)
+
+#### 案例:
 ```shell
-ollama_gtk_client --theme=olive
-或
-ollama_gtk_client -t=olive
+# 使用蓝色主题,并且启动截图后ocr图片内容到内容框
+ollama_gtk_client -t=blue -o -s
 ```
-主题颜色支持:
+#### 主题颜色支持:
 - orange,
 - bark,
 - sage,
