@@ -9,7 +9,7 @@ class StorageUtils {
 
   ///数据文件夹
   static Future<Directory> getAppDateDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     if(homeDirStr == null) {
       throw Exception("获取家目录失败");
     }
@@ -18,7 +18,7 @@ class StorageUtils {
 
   ///获取缓存目录
   static Future<Directory> getTmpDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     Directory appDir = Directory("$homeDirStr/.cache/$appDirName");
     if(!appDir.existsSync()) {
       appDir.createSync(recursive: true);
@@ -28,7 +28,7 @@ class StorageUtils {
 
   ///获取数据目录
   static Future<Directory> getAppConfigDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     Directory appDir = Directory("$homeDirStr/.config/$appDirName");
     if(!appDir.existsSync()) {
       appDir.createSync(recursive: true);
@@ -38,7 +38,7 @@ class StorageUtils {
 
   ///获取下载的临时目录
   static Future<Directory> getTmpDownloadsDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     Directory appDir = Directory("$homeDirStr/.cache/$appDirName/Downloads");
     if(!appDir.existsSync()) {
       appDir.createSync(recursive: true);
@@ -48,7 +48,7 @@ class StorageUtils {
 
   ///获取截图的临时目录
   static Future<Directory> getTmpPictureDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     Directory captureDir = Directory("$homeDirStr/.cache/$appDirName/Pictures/capture");
     if(!captureDir.existsSync()) {
       captureDir.createSync(recursive: true);
@@ -58,7 +58,7 @@ class StorageUtils {
 
   ///获取截图的插件目录
   static Future<Directory> getPluginsDir() async {
-    String? homeDirStr = EnvUtils.getEnvVal(key: "HOME");
+    String? homeDirStr = EnvUtils.getHomeEnv();
     Directory captureDir = Directory("$homeDirStr/.config/$appDirName/plugins");
     if(!captureDir.existsSync()) {
       captureDir.createSync(recursive: true);

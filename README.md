@@ -69,18 +69,18 @@ ollama_gtk_client -t=blue -o -s
 
 ## Flutter Dependencies 说明
 
-| 技术 | 说明                       |
-| --- |--------------------------|
-| provider | 状态管理                     |
-| handy_window | 外观                       |
-| ollama_dart | ollama的调取实现              |
-| bot_toast | 消息通知                     |
-| flutter_distributor | 打包工具                     |
-| flutter_markdown | markdown显示               |
-| gtk | Canonical出品的GTK工具集合      |
-| yaru | Canonical出品的Ubuntu风味外观   |
-| safe_change_notifier | Canonical下的安全的provider管理 |
-| ffi | 跨平台调用c++ |
+| 技术 | 说明                       | linux支持 | windows支持 |
+| --- |--------------------------| ----------- |-----------|
+| provider | 状态管理                     | [x] | [x]       |
+| handy_window | 外观                       | [x] | [ ]       |
+| ollama_dart | ollama的调取实现              | [x] | [x]       |
+| bot_toast | 消息通知                     | [x] | [x]       |
+| flutter_distributor | 打包工具                     | [x] | [x]       |
+| flutter_markdown | markdown显示               | [x] | [x]       |
+| gtk | Canonical出品的GTK工具集合      | [x] | [ ]       |
+| yaru | Canonical出品的Ubuntu风味外观   | [x] | [x]       |
+| safe_change_notifier | Canonical下的安全的provider管理 | [x] | [x]       |
+| ffi | 跨平台调用c++ | [x] | [x]       |
 
 
 ## 打包

@@ -39,7 +39,12 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Ollama Client',
           theme: yaru.theme,
-          darkTheme: yaru.darkTheme,
+          darkTheme: platform.isLinux ? yaru.darkTheme : ThemeData(
+              fontFamily: "MiSans",
+              colorScheme: ColorScheme.dark(
+                  primary: Colors.blueAccent
+              )
+          ),
           highContrastTheme: yaruHighContrastLight,
           highContrastDarkTheme: yaruHighContrastDark,
           builder: (context, child) {

@@ -37,3 +37,7 @@ flutter:
     - family: YaruIcons
       fonts:
         - asset: assets/yaru_icons.otf
+    - family: MiSans
+      fonts:
+        - asset: assets/fonts/MiSans-Regular.ttf
+        - asset: assets/fonts/MiSans-Demibold.ttf

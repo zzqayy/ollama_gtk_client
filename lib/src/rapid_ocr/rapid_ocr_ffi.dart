@@ -6,19 +6,19 @@ import 'package:ollama_gtk_client/src/rapid_ocr/model.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:ollama_gtk_client/utils/storage_utils.dart';
 
-//rapidOCR模型
+///rapidOCR模型
 final class RapidOCRModel extends Struct {
 
-  //检测模型(det)模型目录
+  ///检测模型(det)模型目录
   external Pointer<Utf8> detPath;
 
-  //方向分类器(cls)目录
+  ///方向分类器(cls)目录
   external Pointer<Utf8> clsPath;
 
-  //识别模型(rec)目录
+  ///识别模型(rec)目录
   external Pointer<Utf8> recPath;
 
-  //key路径
+  ///key路径
   external Pointer<Utf8> szKeyPath;
 }
 
@@ -33,7 +33,7 @@ typedef RapidOCRDart = Pointer<Utf8> Function(RapidOCRModel ocrModel, int nThrea
 //ocr工具
 class RapidOCRUtils {
 
-  static const String LIB_SO_PATH = "libRapidOcrOnnx.so";
+  static const String LIB_SO_PATH = "libRapidOcrOnnx";
 
   ///获取ocr插件目录地址
   static Future<String> getOcrPluginsDirPath() async {
@@ -48,7 +48,18 @@ class RapidOCRUtils {
   ///获取ocr插件文件地址
   static Future<String> getOcrPluginsPath() async {
     String dirPath = await getOcrPluginsDirPath();
-    return "$dirPath/$LIB_SO_PATH";
+    return "$dirPath/$LIB_SO_PATH${getDynamicsSuffix()}";
+  }
+
+  ///获取动态后缀
+  static String? getDynamicsSuffix() {
+    if(Platform.isLinux) {
+      return ".so";
+    }else if(Platform.isWindows) {
+      return ".dll";
+    }else {
+      return null;
+    }
   }
 
   ///检查ocr插件是否存在
@@ -58,7 +69,10 @@ class RapidOCRUtils {
     return pluginsFile.existsSync();
   }
 
-  //识别图片
+  /// 识别图片
+  /// ocrModel 识别对象
+  /// imagePath 图片对象
+  /// processNum 进程数量
   static Future<String?> ocr({required OCRModel ocrModel, required String imagePath, int processNum = 4}) async {
     try{
       String pluginsPath = await getOcrPluginsPath();
