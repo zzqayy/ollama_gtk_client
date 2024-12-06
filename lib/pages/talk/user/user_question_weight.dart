@@ -15,6 +15,7 @@ import 'package:ollama_gtk_client/src/xdg_desktop_portal.dart/lib/xdg_desktop_po
 import 'package:ollama_gtk_client/utils/env_utils.dart';
 import 'package:ollama_gtk_client/utils/msg_utils.dart';
 import 'package:ollama_gtk_client/utils/process_utils.dart';
+import 'package:ollama_gtk_client/utils/screenshot_utils.dart';
 import 'package:platform_linux/platform.dart';
 import 'package:provider/provider.dart';
 import 'package:yaru/yaru.dart';
@@ -181,11 +182,13 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                           },
                         ))
                             .toList(),
-                        child: Text(settingModel.templates
-                            .where((template) =>
-                        true == template.chooseStatus)
-                            .firstOrNull
-                            ?.templateName ??"无"
+                        child: Tooltip(
+                          message: (settingModel.templates.where((template) => true == template.chooseStatus).firstOrNull?.templateName ??"无"),
+                          child: Text((
+                              (settingModel.templates.where((template) => true == template.chooseStatus).firstOrNull?.templateName.length??0) > 5
+                                  ? settingModel.templates.where((template) => true == template.chooseStatus).firstOrNull?.templateName.substring(0, 5)
+                                  : settingModel.templates.where((template) => true == template.chooseStatus).firstOrNull?.templateName
+                          )??"未选择"),
                         ),
                         onPressed: () {
                           showDialog(
@@ -220,7 +223,10 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
                       child: Text(model.model??"", overflow: TextOverflow.ellipsis,),
                       onTap: () => settingModel.changeRunningModel(context, modelName:model.model),
                     )).toList(),
-                    child: Text(settingModel.runningModel?.model??"未选择"),
+                    child: Tooltip(
+                      message: settingModel.runningModel?.model??"未选择",
+                      child: Text(((settingModel.runningModel?.model?.length??0) > 8 ? settingModel.runningModel?.model?.substring(0, 8) : settingModel.runningModel?.model)??"未选择"),
+                    ),
                     onOptionsPressed: () async => await settingModel.refreshModelList(context),
                   ),
                   Expanded(child: Container()),
@@ -405,45 +411,15 @@ class _UserQuestionWidgetState extends State<UserQuestionWidget> {
   Future<void> screenshot2Base64({required BuildContext context, required SettingModel settingModel}) async {
     await YaruWindow.of(context).hide();
     Future.delayed(Duration(milliseconds: 600), () async {
-      String? screenshotUri = null;
-      if(platform.isLinux) {
-        if(platform.isKDE) {
-          try{
-            screenshotUri = await ProcessUtils.captureKDEArea();
-          }catch(e) {
-            MessageUtils.errorWithContext(context, msg: "调用spectacle截图失败,请查看是否有该应用");
-            return;
-          }finally {
-            await YaruWindow.of(context).show();
-          }
-        }else {
-          //除了kde其他截图都使用xdg截图接口
-          var client = XdgDesktopPortalClient();
-          try {
-            final screenshot = await client.screenshot.screenshot(interactive: true);
-            screenshotUri = screenshot.uri;
-          }catch(e) {
-            MessageUtils.errorWithContext(context, msg: "截图未完成");
-            return;
-          }finally {
-            await client.close();
-            await YaruWindow.of(context).show();
-          }
-        }
-      }
-      if(screenshotUri != null && screenshotUri.isNotEmpty) {
-        var fileUri = Uri.decodeFull(screenshotUri);
-        if(fileUri.startsWith('file://')) {
-          fileUri = fileUri.replaceFirst('file://', '');
-        }
+      String? screenshotUri = await ScreenshotUtils.screenshotArea(context);
+      if(screenshotUri != "") {
         setState(() {
-          _chooseFile = File(fileUri);
+          _chooseFile = File(screenshotUri);
         });
         if(ocrStatus) {
           ocr(context, settingModel);
         }
       }
-
     });
 
   }
